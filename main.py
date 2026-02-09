@@ -77,7 +77,7 @@ class DicePlugin(Star):
         )
 
     
-    # @filter.command("r")
+    @filter.command("r")
     async def handle_roll_dice(self, event: AstrMessageEvent, message: str = None, remark : str = None):
         """普通掷骰：改为直接调用 dice.handle_roll_dice，输出由 get_output 管理（无 fallback）"""
         
@@ -141,7 +141,9 @@ class DicePlugin(Star):
         await self.save_log(group_id = event.get_group_id(), content = text)
         
         await client.api.call_action("send_group_msg", **payloads)
-            
+
+
+    @filter.command("rh")
     async def roll_hidden(self, event: AstrMessageEvent, message: str = None):
         """私聊发送掷骰结果 —— 所有文本由 get_output 管理（无 fallback）"""
         sender_id = event.get_sender_id()
@@ -152,7 +154,7 @@ class DicePlugin(Star):
 
         private_text = dice_mod.roll_hidden(message)
 
-        # 3) 发送私聊（使用平台 API）
+        # 发送私聊（使用平台 API）
         client = event.bot
         payloads = {
             "user_id": sender_id,
@@ -251,11 +253,13 @@ class DicePlugin(Star):
 
     @command_group("pc")
     def pc(self):
+        """pc人物卡相关指令"""
         pass
 
     # ----------------- pc create -----------------
     @pc.command("create")
     async def pc_create_character(self, event, name: Optional[str] = None, attributes: str = ""):
+        """创建pc人物卡"""
         user_id = event.get_sender_id()
         user_name = event.get_sender_name()
         characters = charmod.get_all_characters(user_id)
@@ -298,6 +302,7 @@ class DicePlugin(Star):
     # ----------------- pc show -----------------
     @pc.command("show")
     async def pc_show_character(self, event, attribute_name: Optional[str] = None):
+        """展示当前人物卡的属性，或展示特定属性值"""
         user_id = event.get_sender_id()
         chara_id = charmod.get_current_character_id(user_id)
 
@@ -324,6 +329,7 @@ class DicePlugin(Star):
     # ----------------- pc list -----------------
     @pc.command("list")
     async def pc_list_characters(self, event):
+        """列出用户所有的人物卡，标明当前使用的人物卡"""
         user_id = event.get_sender_id()
         characters = charmod.get_all_characters(user_id)
         if not characters:
@@ -338,6 +344,7 @@ class DicePlugin(Star):
     # ----------------- pc change -----------------
     @pc.command("change")
     async def pc_change_character(self, event, name: str):
+        """切换当前使用的人物卡"""
         user_id = event.get_sender_id()
         characters = charmod.get_all_characters(user_id)
         if name not in characters:
@@ -351,6 +358,7 @@ class DicePlugin(Star):
     # ----------------- pc update -----------------
     @pc.command("update")
     async def pc_update_character(self, event, attribute: str, value: str):
+        """更新当前人物卡的属性值，支持直接赋值或使用 + - * 运算符进行修改，value 支持掷骰表达式（如 2d6）"""
         user_id = event.get_sender_id()
         chara_id = charmod.get_current_character_id(user_id)
         if not chara_id:
@@ -401,6 +409,7 @@ class DicePlugin(Star):
     # ----------------- pc delete -----------------
     @pc.command("delete")
     async def pc_delete_character(self, event, name: str):
+        """删除指定的人物卡"""
         user_id = event.get_sender_id()
         success, _ = charmod.delete_character(user_id, name)
         if not success:
@@ -412,6 +421,7 @@ class DicePlugin(Star):
     # ----------------- filter sn -----------------
     @filter.command("sn")
     async def filter_set_nickname(self, event):
+        """改写群昵称为当前人物卡的名字，需平台支持（施工中）"""
         if event.get_platform_name() != "aiocqhttp":
             yield event.plain_result(get_output("nick.platform_unsupported"))
             return
@@ -441,7 +451,9 @@ class DicePlugin(Star):
 
     
     # ========================================================= #
+    @filter.command("ra")
     async def roll_attribute(self, event: AstrMessageEvent, skill_name: str, skill_value: str = None):
+        """技能骰"""
         user_id = event.get_sender_id()
         group_id = event.get_group_id()
         name = event.get_sender_name()
@@ -469,7 +481,9 @@ class DicePlugin(Star):
         await client.api.call_action("send_group_msg", **payloads)
 
     # 惩罚骰技能判定
+    @filter.command("rap")
     async def roll_attribute_penalty(self, event: AstrMessageEvent, dice_count: str = "1", skill_name: str = "", skill_value: str = None):
+        """惩罚骰技能判定"""
         user_id = event.get_sender_id()
         group_id = event.get_group_id()
 
@@ -494,7 +508,9 @@ class DicePlugin(Star):
         await client.api.call_action("send_group_msg", **payloads)
 
     # 奖励骰技能判定
+    @filter.command("rab")
     async def roll_attribute_bonus(self, event: AstrMessageEvent, dice_count: str = "1", skill_name: str = "", skill_value: str = None):
+        """奖励骰技能判定"""
         user_id = event.get_sender_id()
         group_id = event.get_group_id()
 
@@ -519,7 +535,7 @@ class DicePlugin(Star):
         await client.api.call_action("send_group_msg", **payloads)
 
         
-    # @filter.command("en")
+    @filter.command("en")
     async def pc_grow_up(self, event: AstrMessageEvent, skill_name: str, skill_value: str = None):
         """
         .en 技能成长判定
@@ -570,7 +586,7 @@ class DicePlugin(Star):
 
     # ========================================================= #
     # san check
-    # @filter.command("sc")
+    @filter.command("sc")
     async def pc_san_check(self, event: AstrMessageEvent, loss_formula: str):
         """理智检定"""
         user_id = event.get_sender_id()
@@ -643,7 +659,7 @@ class DicePlugin(Star):
         
         await client.api.call_action("send_group_msg", **payloads)
 
-
+    @filter.command("ti")
     async def pc_temporary_insanity(self, event: AstrMessageEvent):
         """临时疯狂"""
         result = sanity.get_temporary_insanity(sanity.phobias, sanity.manias)
@@ -651,7 +667,7 @@ class DicePlugin(Star):
         await self.save_log(group_id = event.get_group_id(), content = text)
         yield event.plain_result(text)
 
-
+    @filter.command("li")
     async def pc_long_term_insanity(self, event: AstrMessageEvent):
         """长期疯狂"""
         result = sanity.get_long_term_insanity(sanity.phobias, sanity.manias)
@@ -724,6 +740,7 @@ class DicePlugin(Star):
 
     @filter.command("init")
     async def initiative(self , event: AstrMessageEvent , instruction: str = None, player_name: str = None):
+        """先攻列表管理"""
         group_id = event.get_group_id()
         user_id = event.get_sender_id()
         user_name = event.get_sender_name()
@@ -738,9 +755,9 @@ class DicePlugin(Star):
             self.remove_by_name(player_name, group_id)
             yield event.plain_result(f"已删除角色{player_name}的先攻")
 
-    # @filter.command("ri")
+    @filter.command("ri")
     async def roll_initiative(self , event: AstrMessageEvent, expr: str = None):
-
+        """以调整值投掷先攻"""
         group_id = event.get_group_id()
         user_id = event.get_sender_id()
         user_name = event.get_sender_name()
@@ -772,6 +789,7 @@ class DicePlugin(Star):
 
     @filter.command("ed")
     async def end_current_round(self , event: AstrMessageEvent):
+        """结束当前回合，进入下一回合"""
         group_id = event.get_group_id()
         current_item = init_list[group_id][current_index[group_id]]
         next_item = self.next_turn(group_id)
@@ -785,12 +803,14 @@ class DicePlugin(Star):
 
     @filter.command("name")
     async def generate_name(self, event: AstrMessageEvent, language: str = "cn", num: int = 5, sex: str = None):
+        """随机生成一些名字"""
         names = generate_names(language=language, num=num, sex=sex)
         yield event.plain_result(get_output("generated_names", num = num, names=", ".join(names)))
 
     # ------------------ CoC角色生成 ------------------ #
     @filter.command("coc")
     async def generate_coc_character(self, event: AstrMessageEvent, x: int = 1):
+        """coc角色生成"""
         characters = [roll_character() for _ in range(x)]
         results = []
         for i, char in enumerate(characters):
@@ -800,6 +820,7 @@ class DicePlugin(Star):
     # ------------------ DnD角色生成 ------------------ #
     @filter.command("dnd")
     async def generate_dnd_character(self, event: AstrMessageEvent, x: int = 1):
+        """dnd角色生成"""
         characters = [roll_dnd_character() for _ in range(x)]
         results = []
         for i, char in enumerate(characters):
@@ -809,11 +830,13 @@ class DicePlugin(Star):
     # ======================== LOG相关 ============================= #
     @filter.command_group("log")
     async def log(event: AstrMessageEvent):
+        """"日志管理相关指令"""
         pass
 
 
     @log.command("new")
     async def cmd_log_new(self, event: AstrMessageEvent):
+        """开始新的日志会话"""
         group = event.message_obj.group_id
         parts = event.message_str.strip().split()
         name = parts[2] if len(parts) >= 3 else None
@@ -884,6 +907,7 @@ class DicePlugin(Star):
     # 注册指令 /dicehelp
     @filter.command("dicehelp")
     async def help ( self , event: AstrMessageEvent):
+        """获取骰子指令"""
         help_text = (
             "基础掷骰\n"
             "`/r 1d100` - 掷 1 个 100 面骰\n"
@@ -937,17 +961,20 @@ class DicePlugin(Star):
         
     @filter.command("fireball")
     async def fireball_cmd(self, event: AstrMessageEvent, ring: int = 3):
+        """施放火球术，计算伤害"""
         result = dice_mod.fireball(ring)
         yield event.plain_result(result)
 
     @filter.command("jrrp")
     async def roll_RP_cmd(self, event: AstrMessageEvent):
+        """ """
         user_id = event.get_sender_id()
         result = dice_mod.roll_RP(user_id)
         yield event.plain_result(result)
 
     @filter.command("setcoc")
     async def setcoc_cmd(self, event: AstrMessageEvent, command: str = " "):
+        """设置coc规则"""
         group_id = event.get_group_id()
         result = modify_coc_great_sf_rule_command(group_id, command)
         yield event.plain_result(result)
@@ -959,7 +986,7 @@ class DicePlugin(Star):
 
         message = event.message_obj.message_str
         
-         # ------------------- 日志收集逻辑 -------------------
+        # ------------------- 日志收集逻辑 -------------------
         group_id = event.message_obj.group_id
         
         if group_id:
