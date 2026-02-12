@@ -46,15 +46,28 @@ log_help_str = '''.log 指令一览：
 '''
 
 async def get_sender_nickname(client, group_id, sender_id) :
-    payloads = {
-        "group_id": group_id,
-        "user_id": sender_id,
-        "no_cache": True
-    }
-    
-    ret = await client.api.call_action("get_group_member_info", **payloads)
-    
-    return ret["card"]
+    # If no group id (private message), or invalid ids, return empty string to allow caller fallback
+    try:
+        if not group_id:
+            return ""
+
+        payloads = {
+            "group_id": group_id,
+            "user_id": sender_id,
+            "no_cache": True
+        }
+
+        ret = await client.api.call_action("get_group_member_info", **payloads)
+
+        # API may return an error structure or raise; defensively extract card/nickname
+        if isinstance(ret, dict):
+            # prefer card (群名片)，若为空则尝试 nickname、username 等字段
+            card = ret.get("card") or ret.get("nickname") or ret.get("user_name") or ""
+            return card
+        return ""
+    except Exception as e:
+        logger.info(f"get_sender_nickname failed: {e}")
+        return ""
 
 async def init():
     await logger_core.initialize()
