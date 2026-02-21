@@ -54,12 +54,16 @@ def fetch_group_rule(group:str)->int:
     csr = ruledb.cursor()
     
     # search for existence
-    try: csr.execute(f"SELECT Rule FROM GroupRule WHERE GroupID = \"{group}\"")
+    try:
+        csr.execute(f"SELECT Rule FROM GroupRule WHERE GroupID = \"{group}\"")
     except:
         ruledb.close()
         return -1   # Selecting Failed
     res = csr.fetchone()
-    return int(res)    # Exec Succeed
+    ruledb.close()
+    if res is None:
+        return -1
+    return int(res[0])    # Exec Succeed
 
 def great_success_range(skill_level:int, rule:int)->list:
     '''
@@ -150,18 +154,28 @@ def get_great_sf_rule(group:str)->int:
     Returns:
         int: rule id, -1 for group not exist.
     '''
+    # ensure DB/table exists
+    coc_rule_init()
+
     # db connection
     ruledb = sqlite3.connect(f"{PLUGIN_DIR}/../data/cocrule.db")
     csr = ruledb.cursor()
-    
+
     # search for existence
-    try: csr.execute(f"SELECT Rule FROM GroupRule WHERE GroupID = \"{group}\"")
+    try:
+        csr.execute(f"SELECT Rule FROM GroupRule WHERE GroupID = \"{group}\"")
     except:
         ruledb.close()
-        return -1   # Selecting Failed
-    
-    res = csr.fetchone()[0]
-    return int(res)    # Exec Succeed
+        return GREAT_SF_RULE_DEFAULT   # Selecting Failed, fallback to default
+
+    res = csr.fetchone()
+    ruledb.close()
+    if res is None:
+        return GREAT_SF_RULE_DEFAULT
+    try:
+        return int(res[0])    # Exec Succeed
+    except:
+        return GREAT_SF_RULE_DEFAULT
 
 
 def modify_coc_great_sf_rule_command(group_id, command: str = " "):
