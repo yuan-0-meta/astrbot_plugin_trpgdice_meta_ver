@@ -74,8 +74,13 @@ output:
   # ---------- 掷骰 ----------
   dice:
     normal:
-      success: "{name} 的结果: {result}"
-      success_remark: "{name} 的 {remark} 结果: {result}"
+      success:
+        - "{name} 的结果: {result}"
+        - "掷骰完成：{name} -> {result}"
+        - "结果已出：{result} （由 {name} 发起）"
+      success_remark:
+        - "{name} 的 {remark} 结果: {result}"
+        - "{name} 的 {remark}：{result}"
       error: "掷骰错误: {error}"
     vampire:
       success: "{name} 的结果: {result}"
