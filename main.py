@@ -23,6 +23,7 @@ from faker import Faker
 from .component import character as charmod
 from .component import dice as dice_mod
 from .component import sanity
+from .component import fu as fu_mod
 from .component.output import get_output
 from .component.utils import generate_names, roll_character, format_character, roll_dnd_character, format_dnd_character
 from .component.rules import modify_coc_great_sf_rule_command
@@ -865,6 +866,29 @@ class DicePlugin(Star):
         for i, char in enumerate(characters):
             results.append(format_dnd_character(char, index=i+1))
         yield event.plain_result(get_output("character_list.dnd", characters="\n\n".join(results)))
+
+    # ------------------ fu相关指令 ------------------ #
+    @command_group("fu")
+    def fu(self):
+        """最终物语 FU 相关指令组(*´ω｀*)"""
+        pass
+
+    @fu.command("check")
+    async def fu_check_command(self, event: AstrMessageEvent, attr1: str = "", attr2: str = "", difficulty: str = "6"):
+        """FU 掷骰检定：.fu check <属性1> <属性2> <难度>
+        属性可以是属性名（会从当前人物卡读取）或直接填数值（表示该属性的数值/骰面）。"""
+        user_id = event.get_sender_id()
+        group_id = event.get_group_id()
+        client = event.bot
+
+        ret = await get_sender_nickname(client, group_id, user_id)
+        ret = event.get_sender_name() if ret == "" else ret
+
+        # 调用 fu 模块进行检定（传入 user_id 以便从人物卡读取属性值）
+        result_text = fu_mod.fu_check(attr1=attr1, attr2=attr2, difficulty=difficulty, user_id=user_id, name=ret)
+
+        await self.save_log(group_id=event.get_group_id(), content=result_text)
+        yield event.plain_result(result_text)
         
     # ======================== LOG相关 ============================= #
     @filter.command_group("log")

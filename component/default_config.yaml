@@ -92,6 +92,18 @@ output:
     detail: "掷骰详情: {detail}"
     expression_error: "表达式错误: {error}"
 
+  # ---------- 最终物语 FU ----------
+  fu:
+    check:
+      great_success: "{name}：大成功！两枚骰子为 {d1} 和 {d2}（关键成功）"
+      great_failure: "{name}：大失败！两枚骰子都是 1"
+      hope_success: "{name}：希望成功。{attribute1}({attribute2}) 掷出 {d1},{d2} → 希望({hope_attr}={hope})，恐惧({fear_attr}={fear})，总和 {total} / 难度 {difficulty}"
+      hope_failure: "{name}：希望失败。{attribute1}({attribute2}) 掷出 {d1},{d2} → 希望({hope_attr}={hope})，恐惧({fear_attr}={fear})，总和 {total} / 难度 {difficulty}"
+      fear_success: "{name}：恐惧成功。{attribute1}({attribute2}) 掷出 {d1},{d2} → 希望({hope_attr}={hope})，恐惧({fear_attr}={fear})，总和 {total} / 难度 {difficulty}"
+      fear_failure: "{name}：恐惧失败。{attribute1}({attribute2}) 掷出 {d1},{d2} → 希望({hope_attr}={hope})，恐惧({fear_attr}={fear})，总和 {total} / 难度 {difficulty}"
+      tie: "{name}：平局（两骰点数相同）。{attribute1}({attribute2}) 掷出 {d1},{d2} → 总和 {total} / 难度 {difficulty}"
+      error: "FU 检定错误: {error}"
+
   # ---------- SAN 理智 ----------
   san:
     check_result:
