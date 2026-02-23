@@ -107,26 +107,9 @@ class DicePlugin(Star):
         # 让 dice 模块处理表达式并返回由 get_output 格式化好的文本（或错误文本）
         result_text = dice_mod.handle_roll_dice(message if message else f"1d{dice_mod.DEFAULT_DICE}", name = ret, remark = remark)
         message_id = event.message_obj.message_id
-        # 如果是在群聊则发送群消息，否则发送私聊（避免在私聊时缺少 group_id 导致 API 报错）
+        # 记录并通过框架返回结果，避免直接调用平台 API 以免引发重复回复
         await self.save_log(group_id = event.get_group_id(), content = result_text)
-        if group_id:
-            payloads = {
-                "group_id": group_id,
-                "message": [
-                    {"type": "reply", "data": {"id": message_id}},
-                    {"type": "at", "data": {"qq": user_id}},
-                    {"type": "text", "data": {"text": "\n" + result_text}}
-                ]
-            }
-            await client.api.call_action("send_group_msg", **payloads)
-        else:
-            payloads = {
-                "user_id": user_id,
-                "message": [
-                    {"type": "text", "data": {"text": result_text}}
-                ]
-            }
-            await client.api.call_action("send_private_msg", **payloads)
+        yield event.plain_result(result_text)
 
     @filter.command("rv")
     async def roll_dice_vampire(self, event: AstrMessageEvent, dice_count: str = "1", difficulty: str = "6"):
@@ -150,19 +133,9 @@ class DicePlugin(Star):
         ret = event.get_sender_name() if ret == "" else ret
         text = get_output("dice.vampire.success", result=result_body, name = ret)
         
-        message_id = event.message_obj.message_id
-        payloads = {
-            "group_id": group_id,
-            "message": [
-                {"type": "reply", "data": {"id": message_id}},
-                {"type": "at", "data": {"qq": user_id}},
-                {"type": "text", "data": {"text": "\n" + text}}
-            ]
-        }
-
+        # 记录并通过框架返回，避免直接调用平台 API 导致重复回复
         await self.save_log(group_id = event.get_group_id(), content = text)
-        
-        await client.api.call_action("send_group_msg", **payloads)
+        yield event.plain_result(text)
 
 
     @filter.command("rh")
@@ -493,24 +466,7 @@ class DicePlugin(Star):
 
         # 依据是否在群聊选择发送方式，私聊去掉 at/reply
         await self.save_log(group_id = event.get_group_id(), content = result_message)
-        if group_id:
-            payloads = {
-                "group_id": group_id,
-                "message": [
-                    {"type": "reply", "data": {"id": event.message_obj.message_id}},
-                    {"type": "at", "data": {"qq": user_id}},
-                    {"type": "text", "data": {"text": "\n" + result_message}}
-                ]
-            }
-            await client.api.call_action("send_group_msg", **payloads)
-        else:
-            payloads = {
-                "user_id": user_id,
-                "message": [
-                    {"type": "text", "data": {"text": result_message}}
-                ]
-            }
-            await client.api.call_action("send_private_msg", **payloads)
+        yield event.plain_result(result_message)
 
     # 惩罚骰技能判定
     @filter.command("rap")
@@ -528,24 +484,7 @@ class DicePlugin(Star):
         result_message = dice_mod.roll_attribute_penalty(dice_count, skill_name, skill_value, str(group_id), ret)
 
         await self.save_log(group_id = event.get_group_id(), content = result_message)
-        if group_id:
-            payloads = {
-                "group_id": group_id,
-                "message": [
-                    {"type": "reply", "data": {"id": event.message_obj.message_id}},
-                    {"type": "at", "data": {"qq": user_id}},
-                    {"type": "text", "data": {"text": "\n" + result_message}}
-                ]
-            }
-            await client.api.call_action("send_group_msg", **payloads)
-        else:
-            payloads = {
-                "user_id": user_id,
-                "message": [
-                    {"type": "text", "data": {"text": result_message}}
-                ]
-            }
-            await client.api.call_action("send_private_msg", **payloads)
+        yield event.plain_result(result_message)
 
     # 奖励骰技能判定
     @filter.command("rab")
@@ -562,17 +501,8 @@ class DicePlugin(Star):
         ret = event.get_sender_name() if ret == "" else ret
         result_message = dice_mod.roll_attribute_bonus(dice_count, skill_name, skill_value, str(group_id), ret)
 
-        payloads = {
-            "group_id": group_id,
-            "message": [
-                {"type": "reply", "data": {"id": event.message_obj.message_id}},
-                {"type": "at", "data": {"qq": user_id}},
-                {"type": "text", "data": {"text": "\n" + result_message}}
-            ]
-        }
-
         await self.save_log(group_id = event.get_group_id(), content = result_message)
-        await client.api.call_action("send_group_msg", **payloads)
+        yield event.plain_result(result_message)
 
         
     @filter.command("en")
