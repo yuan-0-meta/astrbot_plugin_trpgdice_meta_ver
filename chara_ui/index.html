@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>角色卡管理</title>
+  <link rel="stylesheet" href="/chara/style.css">
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>角色卡管理</h1>
+      <div class="controls">
+        <input id="userId" placeholder="输入 user_id（例如 QQ号）" />
+        <button id="loadBtn">加载角色</button>
+      </div>
+    </header>
+    <main>
+      <aside class="list">
+        <h2>角色列表</h2>
+        <ul id="charList"></ul>
+        <button id="newBtn">新建空角色</button>
+      </aside>
+      <section class="detail">
+        <h2 id="detailTitle">角色详情</h2>
+        <div id="detailArea">请选择一个角色</div>
+        <div class="actions">
+          <button id="saveBtn">保存</button>
+          <button id="setCurrentBtn">设为当前</button>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script>
+    // 若 URL 带有 ?user_id=xxx，则自动填充并触发加载
+    (function(){
+      try{
+        const params = new URLSearchParams(window.location.search);
+        const uid = params.get('user_id') || params.get('userId') || params.get('userid');
+        if(uid){
+          // 把 user_id 放到输入框并尝试自动点击加载（等待脚本就绪）
+          window._prefilled_user_id = uid;
+        }
+      }catch(e){}
+    })();
+  </script>
+  <script src="/chara/app.js"></script>
+</body>
+</html>

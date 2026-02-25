@@ -18,6 +18,12 @@ import os
 import uuid
 import sqlite3
 from faker import Faker
+import threading
+import uvicorn
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 # ========== MODULE IMPORT ========== #
 from .component import character as charmod
@@ -39,6 +45,82 @@ init_list = {}
 current_index = {}
 
 DEFAULT_DICE = 100
+
+# 创建FastAPI应用用于角色卡Web界面
+web_app = FastAPI(title="TRPG Character Manager")
+web_app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 挂载静态文件
+frontend_path = os.path.join(PLUGIN_DIR, "log-painter", "frontend", "dist")
+if os.path.exists(frontend_path):
+    web_app.mount("/", StaticFiles(directory=frontend_path, html=True), name="static")
+
+# 挂载最小角色卡 UI（若存在）
+chara_ui_path = os.path.join(PLUGIN_DIR, "chara_ui")
+if os.path.exists(chara_ui_path):
+    web_app.mount("/chara", StaticFiles(directory=chara_ui_path, html=True), name="chara")
+
+# 角色卡API路由
+@web_app.get("/api/characters/{user_id}")
+async def get_user_characters(user_id: str):
+    """获取用户的所有角色卡"""
+    try:
+        characters = charmod.get_all_characters(user_id)
+        result = []
+        for name, chara_id in characters.items():
+            chara_data = charmod.load_character(user_id, chara_id)
+            if chara_data:
+                result.append({
+                    "id": chara_id,
+                    "name": name,
+                    "attributes": chara_data.get("attributes", {}),
+                    "is_current": chara_id == charmod.get_current_character_id(user_id)
+                })
+        return {"characters": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@web_app.get("/api/characters/{user_id}/{chara_id}")
+async def get_character(user_id: str, chara_id: str):
+    """获取特定角色卡"""
+    try:
+        chara_data = charmod.load_character(user_id, chara_id)
+        if not chara_data:
+            raise HTTPException(status_code=404, detail="Character not found")
+        return chara_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@web_app.put("/api/characters/{user_id}/{chara_id}")
+async def update_character(user_id: str, chara_id: str, data: dict):
+    """更新角色卡"""
+    try:
+        charmod.save_character(user_id, chara_id, data)
+        return {"status": "success"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@web_app.post("/api/characters/{user_id}/current/{chara_id}")
+async def set_current_character(user_id: str, chara_id: str):
+    """设置当前角色卡"""
+    try:
+        charmod.set_current_character(user_id, chara_id)
+        return {"status": "success"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+def start_web_server():
+    """启动Web服务器"""
+    try:
+        uvicorn.run(web_app, host="127.0.0.1", port=8080, log_level="info")
+    except Exception as e:
+        logger.info(f"Web server failed to start: {e}")
 
 log_help_str = '''.log 指令一览：
     .log on -- 开启log记录。亚托莉会记录之后所有的对话，并保存在“群名+时间”文件夹内。（施工中）
@@ -79,6 +161,10 @@ class DicePlugin(Star):
         self.wakeup_prefix = [".", "。", "/"]
 
         super().__init__(context)
+        
+        # 启动Web服务器线程
+        web_thread = threading.Thread(target=start_web_server, daemon=True)
+        web_thread.start()
 
     async def save_log(self, group_id, content) :
         ok, info = await logger_core.add_message(
