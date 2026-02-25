@@ -5,7 +5,7 @@ from .output import get_output
 
 PLUGIN_DIR = os.path.dirname(os.path.abspath(__file__))
 
-GREAT_SF_RULE_DEFAULT = 2
+GREAT_SF_RULE_DEFAULT = 1
 GREAT_SF_RULE_STR = ["", "严格规则", "COC7版规则", "阶段性规则", "宽松规则"]
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #

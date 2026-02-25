@@ -73,7 +73,7 @@ async def get_sender_nickname(client, group_id, sender_id) :
 async def init():
     await logger_core.initialize()
 
-@register("astrbot_plugin_TRPG", "shiroling", "TRPG玩家用骰", "1.0.3")
+@register("astrbot_plugin_TRPG", "元.0", "TRPG玩家用骰", "1.0.0")
 class DicePlugin(Star):
     def __init__(self, context: Context):
         self.wakeup_prefix = [".", "。", "/"]
@@ -84,7 +84,7 @@ class DicePlugin(Star):
         ok, info = await logger_core.add_message(
             group_id=group_id,
             user_id="Bot",
-            nickname="风铃Velinithra",
+            nickname="元",
             timestamp=int(time.time()),
             text=content,
             isDice = True
@@ -93,7 +93,7 @@ class DicePlugin(Star):
     
     @filter.command("r")
     async def handle_roll_dice(self, event: AstrMessageEvent, message: str = None, remark : str = None):
-        """普通掷骰：改为直接调用 dice.handle_roll_dice，输出由 get_output 管理（无 fallback）"""
+        """普通掷骰"""
         
         message = message.strip() if message else None
 
@@ -113,7 +113,7 @@ class DicePlugin(Star):
 
     @filter.command("rv")
     async def roll_dice_vampire(self, event: AstrMessageEvent, dice_count: str = "1", difficulty: str = "6"):
-        """吸血鬼掷骰：使用 dice.roll_dice_vampire 得到内部结果，然后通过 get_output 输出模板文本（无 fallback）"""
+        """吸血鬼掷骰"""
         # 验证参数
         try:
             int_dice_count = int(dice_count)
@@ -140,7 +140,7 @@ class DicePlugin(Star):
 
     @filter.command("rh")
     async def roll_hidden(self, event: AstrMessageEvent, message: str = None):
-        """私聊发送掷骰结果 —— 所有文本由 get_output 管理（无 fallback）"""
+        """私聊发送掷骰结果"""
         sender_id = event.get_sender_id()
         message = message.strip() if message else f"1d{dice_mod.DEFAULT_DICE}"
 
@@ -170,7 +170,7 @@ class DicePlugin(Star):
 
     @filter.command("st")
     async def status(self, event: AstrMessageEvent, attributes: str = None, exp : str = None):
-        """人物卡属性更新 / 掷骰"""
+        """人物卡属性更新，支持掷骰"""
         if not attributes:
             return
 
@@ -798,9 +798,9 @@ class DicePlugin(Star):
         yield event.plain_result(get_output("character_list.dnd", characters="\n\n".join(results)))
 
     # ------------------ fu相关指令 ------------------ #
-    @command_group("fu")
-    def fu(self):
-        """最终物语 FU 相关指令组(*´ω｀*)"""
+    @filter.command_group("fu")
+    async def fu(self, event: AstrMessageEvent):
+        """最终物语 FU 相关指令组"""
         pass
 
     @fu.command("check")
@@ -902,52 +902,66 @@ class DicePlugin(Star):
     async def help ( self , event: AstrMessageEvent):
         """获取骰子指令"""
         help_text = (
+            "欢迎使用掷骰服务，下面是该服务使用说明和示例，希望能够为您提供帮助……\n\n"
             "基础掷骰\n"
-            "`/r 1d100` - 掷 1 个 100 面骰\n"
-            "`/r 3d6+2d4-1d8` - 掷 3 个 6 面骰 + 2 个 4 面骰 - 1 个 8 面骰\n"
-            "`/r 3#1d20` - 掷 1d20 骰 3 次\n\n"
+            "r 1d100 - 掷 1 个 100 面骰\n"
+            "r 3d6+2d4-1d8 - 掷 3 个 6 面骰 + 2 个 4 面骰 - 1 个 8 面骰\n"
+            "r 3#1d20 - 掷 1d20 骰 3 次\n\n"
             
             "人物卡管理\n"
-            "`/pc create 名称 属性值` - 创建人物卡\n"
-            "`/pc show` - 显示当前人物卡\n"
-            "`/pc list` - 列出所有人物卡\n"
-            "`/pc change 名称` - 切换当前人物卡\n"
-            "`/pc update 属性 值/公式` - 更新人物卡属性\n"
-            "`/pc delete 名称` - 删除人物卡\n\n"
+            "pc create 名称 属性值 - 创建人物卡\n"
+            "pc show - 显示当前人物卡\n"
+            "pc list - 列出所有人物卡\n"
+            "pc change 名称 - 切换当前人物卡\n"
+            "pc update 属性 值/公式 - 更新人物卡属性\n"
+            "pc delete 名称 - 删除人物卡\n\n"
             
             "CoC 相关\n"
-            "`/coc x` - 生成 x 个 CoC 角色数据\n"
-            "`/ra 技能名` - 进行技能骰\n"
-            "`/rap n 技能名` - 带 n 个惩罚骰的技能骰\n"
-            "`/rab n 技能名` - 带 n 个奖励骰的技能骰\n"
-            "`/sc 1d6/1d10` - 进行 San Check\n"
-            "`/ti` - 生成临时疯狂症状\n"
-            "`/li` - 生成长期疯狂症状\n"
-            "`/en 技能名 [技能值]` - 技能成长\n"
-            "`/name [cn/en/jp] [数量]` - 随机生成名字\n"
-            "/setcoc 规则编号 - 设置COC规则\n\n"
+            "coc x - 生成 x 个 CoC 角色数据\n"
+            "ra 技能名 - 进行技能骰\n"
+            "rap n 技能名 - 带 n 个惩罚骰的技能骰\n"
+            "rab n 技能名 - 带 n 个奖励骰的技能骰\n"
+            "sc 1d6/1d10 - 进行 San Check\n"
+            "ti - 生成临时疯狂症状\n"
+            "li - 生成长期疯狂症状\n"
+            "en 技能名 [技能值] - 技能成长\n"
+            "st 属性名 [属性值] - 属性成长，支持掷骰\n"
+            "name [cn/en/jp] [数量] - 随机生成名字\n"
+            "setcoc 规则编号 - 设置COC规则\n"
+
+            "规则编号说明：\n"
+                "1 - 严格规则（大成功1，大失败100）（默认规则）\n"
+                "2 - COC7版规则（大成功1，阶段性大失败）\n"
+                "3 - 阶段性规则（阶段性大成功，阶段性大失败）\n"
+                "4 - 宽松规则（大成功1~5，大失败96~100）\n\n"
             
             "DnD 相关\n"
-            "`/dnd x` - 生成 x 个 DnD 角色属性\n"
-            "`/init` - 显示当前先攻列表\n"
-            "`/init clr` - 清空先攻列表\n"
-            "`/init del [角色名]` - 删除角色先攻（默认为用户名） \n"
-            "`/ri +/- x` - 以x的调整值投掷先攻\n"
-            "`/ri x [角色名]` - 将角色（默认为用户名）的先攻设置为x\n"
-            "`/ed` - 结束当前回合"
-            "`/fireball n` - 施放 n 环火球术，计算伤害\n\n"   
+            "dnd x - 生成 x 个 DnD 角色属性\n"
+            "init - 显示当前先攻列表\n"
+            "init clr - 清空先攻列表\n"
+            "init del [角色名] - 删除角色先攻（默认为用户名） \n"
+            "ri +/- x - 以x的调整值投掷先攻\n"
+            "ri x [角色名] - 将角色（默认为用户名）的先攻设置为x\n"
+            "ed - 结束当前回合\n"
+            "fireball n - 施放 n 环火球术，计算伤害\n\n"
 
             "其他规则\n"
-            "`/rv 骰子数量 难度` - 进行吸血鬼规则掷骰判定\n"
+            "rv 骰子数量 难度 - 进行吸血鬼规则掷骰判定\n\n"
+
+            "fu相关\n"
+            "fu check 属性1 属性2 难度 - 进行 FU 检定，属性可以是属性名（会从当前人物卡读取）或直接填数值（表示该属性的数值/骰面）\n\n"
             
+            "娱乐指令\n"
+            "jrrp - 掷人品骰，返回0-100的随机数，并给出人品评价\n\n"
+
             "Log 管理\n"
-            "/log new <日志名> - 开始新的日志会话\n"
-            "/log off - 暂停当前的日志会话\n"
-            "/log on - 开始当前的日志会话\m"
-            "/log end - 结束当前的日志会话"
-            "/log del <日志名> - 删除日志会话\n"
-            "/log get <日志名> - 获取日志会话\n"
-            "/log stat <日志名> - 获取日志会话统计信息\n"
+            "log new <日志名> - 开始新的日志会话\n"
+            "log off - 暂停当前的日志会话\n"
+            "log on - 开始当前的日志会话\n"
+            "log end - 结束当前的日志会话\n"
+            "log del <日志名> - 删除日志会话\n"
+            "log get <日志名> - 获取日志会话\n"
+            "log stat <日志名> - 获取日志会话统计信息\n"
         )
 
         yield event.plain_result(help_text)
@@ -960,7 +974,7 @@ class DicePlugin(Star):
 
     @filter.command("jrrp")
     async def roll_RP_cmd(self, event: AstrMessageEvent):
-        """ """
+        """ jrrp 人品骰，返回0-100的随机数，并给出人品评价"""
         user_id = event.get_sender_id()
         result = dice_mod.roll_RP(user_id)
         yield event.plain_result(result)
