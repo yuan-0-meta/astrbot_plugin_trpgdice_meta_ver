@@ -1031,8 +1031,10 @@ class DicePlugin(Star):
         if not m:
             return
 
+        # cmd 是小写的命令部分
         cmd = m.group(1).lower()
         # expr/remark 初始值；后续分支会根据命令从 raw/compact 中提取更合理的值
+        # expr 默认是紧凑串去掉命令部分后的剩余文本，remark 默认是 None，后续根据不同命令的特点进行调整
         expr = compact[m.end():].strip()
         remark = None
         
@@ -1040,7 +1042,7 @@ class DicePlugin(Star):
         dice_count = "1"
         
         if cmd[0:2] == "en":
-            sv_match = re.search(r'\d+$', compact)
+            sv_match = re.search(r'([0-9]*[dD][0-9]+(?:[+-][0-9]*[dD][0-9]+)*)', compact) # 检索紧凑串中是否有骰子表达式，支持技能成长中直接掷骰子确定成长值
             if sv_match:
                 skill_value = sv_match.group()
                 expr = compact[2:len(compact)-len(skill_value)]
@@ -1050,7 +1052,7 @@ class DicePlugin(Star):
                 expr = compact[2:]
                 cmd = "en"
         if cmd[0:2] == "ra":
-            sv_match = re.search(r'\d+$', compact)
+            sv_match = re.search(r'([0-9]*[dD][0-9]+(?:[+-][0-9]*[dD][0-9]+)*)', compact)
             if sv_match:
                 skill_value = sv_match.group()
                 expr = compact[2:len(compact)-len(skill_value)]
@@ -1064,7 +1066,7 @@ class DicePlugin(Star):
             if expr and (expr[0] == 'b' or expr[0] == 'p') :
                 cmd = cmd + expr[0]
                 expr = expr[1:]
-                dice_count_match = re.search(r'\d+', expr)
+                dice_count_match = re.search(r'([0-9]*[dD][0-9]+(?:[+-][0-9]*[dD][0-9]+)*)', expr)
                 if dice_count_match:
                     dice_count = dice_count_match.group()
                     expr = expr[dice_count_match.end():]
@@ -1079,7 +1081,7 @@ class DicePlugin(Star):
                 
         elif cmd[0:2] == "rd":
             raw_rd = raw[2:].strip()
-            dice_match = re.match(r'(\d+)', raw_rd)
+            dice_match = re.search(r'([0-9]*[dD][0-9]+(?:[+-][0-9]*[dD][0-9]+)*)', raw_rd)
 
             if dice_match:
                 dice_size = dice_match.group(1)
@@ -1090,13 +1092,12 @@ class DicePlugin(Star):
                 remark = raw_rd.strip()
                 
         elif cmd[0] == "r":
-            # 在原始尾部中查找可能的骰子表达式，支持组合算式如 1d10+1d8-2d6 和重复语法 3#1d10
-            dice_pattern = r'(?:\d+#)?[0-9]*[dD][0-9]+(?:[+\-](?:\d*[dD]\d+|\d+))*'
-            dice_match = re.search(dice_pattern, raw)
+            # 在原始尾部中查找骰子表达式，无论用户是否在表达式前后加空格
+            dice_match = re.search(r'([0-9]*[dD][0-9]+(?:[+-][0-9]*[dD][0-9]+)*)', raw)
             if dice_match:
-                expr = dice_match.group(0)
-                # 备注为去掉骰子表达式前后剩余的文本
-                remark = (raw[:dice_match.start()] + raw[dice_match.end():]).strip()
+                expr = dice_match.group(1)
+                # 备注为骰子内容
+                remark = dice_match
             else:
                 expr = raw.strip()
                 
@@ -1104,159 +1105,18 @@ class DicePlugin(Star):
         # yield event.plain_result(result_message)
 
         if cmd == "r":
-            async for result in self.handle_roll_dice(event, expr, remark):
-                yield result
-
-    @event_message_type(EventMessageType.PRIVATE_MESSAGE)
-    async def identify_command_private(self, event: AstrMessageEvent):
-
-        # 私聊入口，复用群组的识别逻辑（group_id 为空时会跳过群日志）
-        message = event.message_obj.message_str
-
-        # ------------------- 日志收集逻辑 -------------------
-        group_id = event.message_obj.group_id
-
-        if group_id:
-            user_id = event.message_obj.sender.user_id
-            nickname = getattr(event.message_obj.sender, "nickname", "")
-            timestamp = int(event.message_obj.timestamp)
-            components = getattr(event.message_obj, "message", [])
-
-            # 调用功能性模块添加消息
-            await logger_core.add_message(
-                group_id=group_id,
-                user_id=user_id,
-                nickname=nickname,
-                timestamp=timestamp,
-                text=message,
-                components=components
-            )
-        # ----------------------------------------------------
-
-        random.seed(int(time.time() * 1000))
-        
-        if not any(message.startswith(prefix) for prefix in self.wakeup_prefix):
-            return
-
-        # 保留原始尾部文本（保留空格），同时准备一个去除所有空白的紧凑版本用于命令识别
-        raw = message[1:]
-        compact = re.sub(r'\s+', '', raw)
-
-        m = re.match(r'^([a-z]+)', compact, re.I)
-
-        if not m:
-            return
-
-        cmd = m.group(1).lower()
-        # expr/remark 初始值；后续分支会根据命令从 raw/compact 中提取更合理的值
-        expr = compact[m.end():].strip()
-        remark = None
-        
-        skill_value = ""
-        dice_count = "1"
-        
-        if cmd[0:2] == "en":
-            sv_match = re.search(r'\d+$', compact)
-            if sv_match:
-                skill_value = sv_match.group()
-                expr = compact[2:len(compact)-len(skill_value)]
-                cmd = "en"
-            else:
-                skill_value = None
-                expr = compact[2:]
-                cmd = "en"
-        if cmd[0:2] == "ra":
-            sv_match = re.search(r'\d+$', compact)
-            if sv_match:
-                skill_value = sv_match.group()
-                expr = compact[2:len(compact)-len(skill_value)]
-                cmd = "ra"
-            else:
-                skill_value = None
-                expr = compact[2:]
-                cmd = "ra"
-
-            # 支持 b/p 紧接在 ra 后面，使用紧凑串检查
-            if expr and (expr[0] == 'b' or expr[0] == 'p') :
-                cmd = cmd + expr[0]
-                expr = expr[1:]
-                dice_count_match = re.search(r'\d+', expr)
-                if dice_count_match:
-                    dice_count = dice_count_match.group()
-                    expr = expr[dice_count_match.end():]
-                else:
-                    dice_count = "1"
-                    
-            if expr.isdigit():
-                skill_value = expr
-                
-            if not expr and skill_value:
-                expr = skill_value
-                
-        elif cmd[0:2] == "rd":
-            raw_rd = raw[2:].strip()
-            dice_match = re.match(r'(\d+)', raw_rd)
-
-            if dice_match:
-                dice_size = dice_match.group(1)
-                expr = f"1d{dice_size}"
-                remark = raw_rd[(len(dice_size)):].strip()
-            else:
-                expr = "1d100"
-                remark = raw_rd.strip()
-                
-        elif cmd[0] == "r":
-            # 在原始尾部中查找可能的骰子表达式，支持组合算式如 1d10+1d8-2d6 和重复语法 3#1d10
-            dice_pattern = r'(?:\d+#)?[0-9]*[dD][0-9]+(?:[+\-](?:\d*[dD]\d+|\d+))*'
-            dice_match = re.search(dice_pattern, raw)
-            if dice_match:
-                expr = dice_match.group(0)
-                # 备注为去掉骰子表达式前后剩余的文本
-                remark = (raw[:dice_match.start()] + raw[dice_match.end():]).strip()
-            else:
-                expr = raw.strip()
-                
-        # result_message = (f"m={m},message={message},cmd={cmd},expr={expr}.")
-        # yield event.plain_result(result_message)
-
-        if cmd == "r":
-            async for result in self.handle_roll_dice(event, expr, remark):
-                yield result
+            await self.handle_roll_dice(event, expr, remark)
         elif cmd == "rd":
-            async for result in self.handle_roll_dice(event, expr, remark):
-                yield result
+            await self.handle_roll_dice(event, expr, remark)
         elif cmd == "rh":
             async for result in self.roll_hidden(event) :
                 yield result
         elif cmd == "rab":
-            async for result in self.roll_attribute_bonus(event, dice_count, expr, skill_value):
-                yield result
+            await self.roll_attribute_bonus(event, dice_count, expr, skill_value)
         elif cmd == "rap":
-            async for result in self.roll_attribute_penalty(event, dice_count, expr, skill_value):
-                yield result
+            await self.roll_attribute_penalty(event, dice_count, expr, skill_value)
         elif cmd == "ra":
-            async for result in self.roll_attribute(event, expr, skill_value):
-                yield result
-        elif cmd == "en":
-            await self.pc_grow_up(event, expr, skill_value)
-        elif cmd == "sc":
-            async for result in self.pc_san_check(event, expr) :
-                yield result
-        elif cmd == "rd":
-            async for result in self.handle_roll_dice(event, expr, remark):
-                yield result
-        elif cmd == "rh":
-            async for result in self.roll_hidden(event) :
-                yield result
-        elif cmd == "rab":
-            async for result in self.roll_attribute_bonus(event, dice_count, expr, skill_value):
-                yield result
-        elif cmd == "rap":
-            async for result in self.roll_attribute_penalty(event, dice_count, expr, skill_value):
-                yield result
-        elif cmd == "ra":
-            async for result in self.roll_attribute(event, expr, skill_value):
-                yield result
+            await self.roll_attribute(event, expr, skill_value)
         elif cmd == "en":
             await self.pc_grow_up(event, expr, skill_value)
         elif cmd == "sc":
