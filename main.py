@@ -1086,10 +1086,12 @@ class DicePlugin(Star):
             if dice_match:
                 dice_size = dice_match.group(1)
                 expr = f"1d{dice_size}"
-                remark = raw_rd[(len(dice_size)):].strip()
+                remark = dice_match.group(0).strip()
+                cmd = "rd"
             else:
                 expr = "1d100"
                 remark = raw_rd.strip()
+                cmd = "rd"
                 
         elif cmd[0] == "r":
             # 在原始尾部中查找骰子表达式，无论用户是否在表达式前后加空格
@@ -1097,9 +1099,12 @@ class DicePlugin(Star):
             if dice_match:
                 expr = dice_match.group(1)
                 # 备注为骰子内容
-                remark = dice_match
+                remark = dice_match.group(0).strip()
+                cmd = "r"
             else:
                 expr = raw.strip()
+                remark = None
+                cmd = "r"
                 
         # result_message = (f"m={m},message={message},cmd={cmd},expr={expr}.")
         # yield event.plain_result(result_message)
