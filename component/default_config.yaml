@@ -1,11 +1,11 @@
 output:
   # ---------- 技能判定 ----------
   skill_check:
-    normal: "<{name}> 的【{skill_name}】检定: {roll_result}/{skill_value} → {result}"
+    normal: "已经对 <{name}> 进行了【{skill_name}】检定……结果是 {roll_result}/{skill_value} → {result}"
     penalty: "<{name}> 惩罚骰: {new_tens_digits} → 最终结果: {final_y}/{skill_value} → {result}"
     bonus: "<{name}> 奖励骰: {new_tens_digits} → 最终结果: {final_y}/{skill_value} → {result}"
     error:
-      normal: "技能 {skill_name} 未找到"
+      normal: "档案中没有找到技能 【{skill_name}】 ……要不要先检查一下人物卡的信息？"
       penalty: "惩罚骰参数错误: 技能 {skill_name}"
       bonus: "奖励骰参数错误: 技能 {skill_name}"
     grow_up:
@@ -38,8 +38,10 @@ output:
   # ---------- 人格卡操作 ----------
   pc:
     create:
-      duplicate: "人物卡 [{name}] 已存在"
-      success: "人物卡 [{name}] 已创建 (ID: {id})"
+      duplicate: 
+        - "人物卡 [{name}] 已存在，请不要重复创建啊，如果需要切换到它，使用 .pc change {name} 就好了"
+        - "档案库里已经有一个叫 [{name}] 的人物卡了哦，如果要切换到它，直接 .pc change {name} 就行了"
+      success: "人物卡 [{name}] 已创建 (ID: {id})，不要忘了切换到它哦 (.pc change {name})"
     show:
       no_active: "未选择人物卡 (.pc change)"
       load_fail: "人物卡 ID {id} 不存在"
@@ -75,13 +77,18 @@ output:
   dice:
     normal:
       success:
-        - "{name} 的结果: {result}"
-        - "掷骰完成：{name} -> {result}"
-        - "结果已出：{result} （由 {name} 发起）"
+        - "让我看看…… <{name}> 此次投掷的结果是 {result} 。"
+        - "咔哒咔哒，掷骰完成， <{name}> 扔出了 {result} 点。"
+        - "由 <{name}> 发起的掷骰完成了！ 这次的结果是 {result} 呢。"
       success_remark:
-        - "{name} 的 {remark} 结果: {result}"
-        - "{name} 的 {remark}：{result}"
-      error: "掷骰错误: {error}"
+        - "扔一个 {remark} 骰子吗…… <{name}> 的投掷结果是 {result} 哦。"
+        - "<{name}> 扔出的 {remark} 骰子结果是…… {result} ！"
+        - "{remark} 骰子已经掷好了！ <{name}> 的结果是 {result} 。"
+        - "……<{name}> 要扔一个 {remark} 骰子吗？ 掷骰完成了，结果是 {result} 哦。"
+        - "由 <{name}> 发起的 {remark} 掷骰已完成， 结果是 {result} 。\n这样的结果，也在你的预料之中吗？"
+      error: 
+        - "哎呀……出错了！错误原因: {error}\n在有人修理之前，要不我先休息一下……？"
+        - "掷骰失败了！错误信息: {error} \n绝对不是我偷懒不干活……绝对不是哦？"
     vampire:
       success: "{name} 的结果: {result}"
       error: "吸血鬼掷骰错误: {error}"
