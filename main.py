@@ -1039,7 +1039,7 @@ class DicePlugin(Star):
         skill_value = ""
         dice_count = "1"
         
-        if cmd[1:3] == "en":
+        if cmd[0:2] == "en":
             sv_match = re.search(r'\d+$', compact)
             if sv_match:
                 skill_value = sv_match.group()
@@ -1049,7 +1049,7 @@ class DicePlugin(Star):
                 skill_value = None
                 expr = compact[2:]
                 cmd = "en"
-        if cmd[1:3] == "ra":
+        if cmd[0:2] == "ra":
             sv_match = re.search(r'\d+$', compact)
             if sv_match:
                 skill_value = sv_match.group()
@@ -1077,7 +1077,7 @@ class DicePlugin(Star):
             if not expr and skill_value:
                 expr = skill_value
                 
-        elif cmd[1:3] == "rd":
+        elif cmd[0:2] == "rd":
             raw_rd = raw[2:].strip()
             dice_match = re.match(r'(\d+)', raw_rd)
 
@@ -1089,7 +1089,7 @@ class DicePlugin(Star):
                 expr = "1d100"
                 remark = raw_rd.strip()
                 
-        elif cmd[1:2] == "r":
+        elif cmd[0] == "r":
             # 在原始尾部中查找骰子表达式，无论用户是否在表达式前后加空格
             dice_match = re.search(r'([0-9]*[dD][0-9]+)', raw)
             if dice_match:
