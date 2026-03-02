@@ -1103,18 +1103,23 @@ class DicePlugin(Star):
         # yield event.plain_result(result_message)
 
         if cmd == "r":
-            await self.handle_roll_dice(event, expr, remark)
+            async for result in self.handle_roll_dice(event, expr, remark):
+                yield result
         elif cmd == "rd":
-            await self.handle_roll_dice(event, expr, remark)
+            async for result in self.handle_roll_dice(event, expr, remark):
+                yield result
         elif cmd == "rh":
             async for result in self.roll_hidden(event) :
                 yield result
         elif cmd == "rab":
-            await self.roll_attribute_bonus(event, dice_count, expr, skill_value)
+            async for result in self.roll_attribute_bonus(event, dice_count, expr, skill_value):
+                yield result
         elif cmd == "rap":
-            await self.roll_attribute_penalty(event, dice_count, expr, skill_value)
+            async for result in self.roll_attribute_penalty(event, dice_count, expr, skill_value):
+                yield result
         elif cmd == "ra":
-            await self.roll_attribute(event, expr, skill_value)
+            async for result in self.roll_attribute(event, expr, skill_value):
+                yield result
         elif cmd == "en":
             await self.pc_grow_up(event, expr, skill_value)
         elif cmd == "sc":
