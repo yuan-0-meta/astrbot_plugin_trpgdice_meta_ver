@@ -1117,6 +1117,7 @@ class DicePlugin(Star):
         if cmd == "r":
             async for result in self.handle_roll_dice(event, expr, remark):
                 yield result
+                yield event.plain_result("如果需要查询指令帮助，请使用 .dicehelp 指令")
         elif cmd == "rd":
             async for result in self.handle_roll_dice(event, expr, remark):
                 yield result
