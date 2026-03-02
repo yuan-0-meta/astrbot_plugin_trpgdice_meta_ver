@@ -1019,43 +1019,46 @@ class DicePlugin(Star):
         
         if not any(message.startswith(prefix) for prefix in self.wakeup_prefix):
             return
-        
-        message = re.sub(r'\s+', '', message[1:])
 
-        m = re.match(r'^([a-z]+)', message, re.I)
+        # 保留原始尾部文本（保留空格），同时准备一个去除所有空白的紧凑版本用于命令识别
+        raw = message[1:]
+        compact = re.sub(r'\s+', '', raw)
+
+        m = re.match(r'^([a-z]+)', compact, re.I)
 
         if not m:
-            #raise ValueError('无法识别的指令格式!')
             return
-        
-        cmd  = m.group(1).lower() if m else ""
-        expr = message[m.end():].strip()
+
+        cmd = m.group(1).lower()
+        # expr/remark 初始值；后续分支会根据命令从 raw/compact 中提取更合理的值
+        expr = compact[m.end():].strip()
         remark = None
         
         skill_value = ""
         dice_count = "1"
         
         if cmd[0:2] == "en":
-            sv_match = re.search(r'\d+$', message)
+            sv_match = re.search(r'\d+$', compact)
             if sv_match:
                 skill_value = sv_match.group()
-                expr = message[2:len(message)-len(skill_value)]
+                expr = compact[2:len(compact)-len(skill_value)]
                 cmd = "en"
             else:
                 skill_value = None
-                expr = message[2:]
+                expr = compact[2:]
                 cmd = "en"
         if cmd[0:2] == "ra":
-            sv_match = re.search(r'\d+$', message)
+            sv_match = re.search(r'\d+$', compact)
             if sv_match:
                 skill_value = sv_match.group()
-                expr = message[2:len(message)-len(skill_value)]
+                expr = compact[2:len(compact)-len(skill_value)]
                 cmd = "ra"
             else:
                 skill_value = None
-                expr = message[2:]
+                expr = compact[2:]
                 cmd = "ra"
-                
+
+            # 支持 b/p 紧接在 ra 后面，使用紧凑串检查
             if expr and (expr[0] == 'b' or expr[0] == 'p') :
                 cmd = cmd + expr[0]
                 expr = expr[1:]
@@ -1073,26 +1076,26 @@ class DicePlugin(Star):
                 expr = skill_value
                 
         elif cmd[0:2] == "rd":
-            raw = message[2:].strip()
-            dice_match = re.match(r'(\d+)', raw)
-            
+            raw_rd = raw[2:].strip()
+            dice_match = re.match(r'(\d+)', raw_rd)
+
             if dice_match:
                 dice_size = dice_match.group(1)
                 expr = f"1d{dice_size}"
-                remark = raw[(len(dice_size)):].strip()
+                remark = raw_rd[(len(dice_size)):].strip()
             else:
                 expr = "1d100"
-                remark = raw.strip()
+                remark = raw_rd.strip()
                 
         elif cmd[0] == "r":
-            r_match = re.match(r'([0-9]*[dD][0-9]+)', message[1:])
-            if r_match:
-                expr = r_match.group(1)
-                remark = message[1+len(expr):].strip()
-                if remark:
-                    expr = expr
+            # 在原始尾部中查找骰子表达式，无论用户是否在表达式前后加空格
+            dice_match = re.search(r'([0-9]*[dD][0-9]+)', raw)
+            if dice_match:
+                expr = dice_match.group(1)
+                # 备注为去掉骰子表达式前后剩余的文本
+                remark = (raw[:dice_match.start()] + raw[dice_match.end():]).strip()
             else:
-                expr = message[1:].strip()
+                expr = raw.strip()
                 
         # result_message = (f"m={m},message={message},cmd={cmd},expr={expr}.")
         # yield event.plain_result(result_message)
