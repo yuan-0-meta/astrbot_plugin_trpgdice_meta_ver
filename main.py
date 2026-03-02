@@ -91,7 +91,7 @@ class DicePlugin(Star):
         )
 
     
-    @filter.command("r")
+    @filter.command(".r", alias=["。r", "/r"])
     async def handle_roll_dice(self, event: AstrMessageEvent, message: str = None, remark : str = None):
         """普通掷骰"""
         
@@ -111,7 +111,7 @@ class DicePlugin(Star):
         await self.save_log(group_id = event.get_group_id(), content = result_text)
         yield event.plain_result(result_text)
 
-    @filter.command("rv")
+    @filter.command(".rv", alias=["。rv", "/rv"])
     async def roll_dice_vampire(self, event: AstrMessageEvent, dice_count: str = "1", difficulty: str = "6"):
         """吸血鬼掷骰"""
         # 验证参数
@@ -138,7 +138,7 @@ class DicePlugin(Star):
         yield event.plain_result(text)
 
 
-    @filter.command("rh")
+    @filter.command(".rh", alias=["。rh", "/rh"])
     async def roll_hidden(self, event: AstrMessageEvent, message: str = None):
         """私聊发送掷骰结果"""
         sender_id = event.get_sender_id()
@@ -168,7 +168,7 @@ class DicePlugin(Star):
         await client.api.call_action("send_private_msg", **payloads)
 
 
-    @filter.command("st")
+    @filter.command(".st", alias=["。st", "/st"])
     async def status(self, event: AstrMessageEvent, attributes: str = None, exp : str = None):
         """人物卡属性更新，支持掷骰"""
         if not attributes:
@@ -246,7 +246,7 @@ class DicePlugin(Star):
 
 
 
-    @command_group("pc")
+    @command_group(".pc", alias=["。pc", "/pc"])
     def pc(self):
         """pc人物卡相关指令"""
         pass
@@ -414,7 +414,7 @@ class DicePlugin(Star):
 
 
     # ----------------- filter sn -----------------
-    @filter.command("sn")
+    @filter.command(".sn",alias=["。sn", "/sn"])
     async def filter_set_nickname(self, event):
         """改写群昵称为当前人物卡的名字，需平台支持（施工中）"""
         if event.get_platform_name() != "aiocqhttp":
@@ -446,7 +446,7 @@ class DicePlugin(Star):
 
     
     # ========================================================= #
-    @filter.command("ra")
+    @filter.command(".ra", alias=["。ra", "/ra"])
     async def roll_attribute(self, event: AstrMessageEvent, skill_name: str, skill_value: str = None):
         """技能骰"""
         user_id = event.get_sender_id()
@@ -469,7 +469,7 @@ class DicePlugin(Star):
         yield event.plain_result(result_message)
 
     # 惩罚骰技能判定
-    @filter.command("rap")
+    @filter.command(".rap", alias=["。rap", "/rap"])
     async def roll_attribute_penalty(self, event: AstrMessageEvent, dice_count: str = "1", skill_name: str = "", skill_value: str = None):
         """惩罚骰技能判定"""
         user_id = event.get_sender_id()
@@ -487,7 +487,7 @@ class DicePlugin(Star):
         yield event.plain_result(result_message)
 
     # 奖励骰技能判定
-    @filter.command("rab")
+    @filter.command(".rab", alias=["。rab", "/rab"])
     async def roll_attribute_bonus(self, event: AstrMessageEvent, dice_count: str = "1", skill_name: str = "", skill_value: str = None):
         """奖励骰技能判定"""
         user_id = event.get_sender_id()
@@ -505,7 +505,7 @@ class DicePlugin(Star):
         yield event.plain_result(result_message)
 
         
-    @filter.command("en")
+    @filter.command(".en", alias=["。en", "/en"])
     async def pc_grow_up(self, event: AstrMessageEvent, skill_name: str, skill_value: str = None):
         """
         .en 技能成长判定
@@ -556,7 +556,7 @@ class DicePlugin(Star):
 
     # ========================================================= #
     # san check
-    @filter.command("sc")
+    @filter.command(".sc", alias=["。sc", "/sc"])
     async def pc_san_check(self, event: AstrMessageEvent, loss_formula: str):
         """理智检定"""
         user_id = event.get_sender_id()
@@ -629,7 +629,7 @@ class DicePlugin(Star):
         
         await client.api.call_action("send_group_msg", **payloads)
 
-    @filter.command("ti")
+    @filter.command(".ti", alias=["。ti", "/ti"])
     async def pc_temporary_insanity(self, event: AstrMessageEvent):
         """临时疯狂"""
         result = sanity.get_temporary_insanity(sanity.phobias, sanity.manias)
@@ -637,7 +637,7 @@ class DicePlugin(Star):
         await self.save_log(group_id = event.get_group_id(), content = text)
         yield event.plain_result(text)
 
-    @filter.command("li")
+    @filter.command(".li", alias=["。li", "/li"])
     async def pc_long_term_insanity(self, event: AstrMessageEvent):
         """长期疯狂"""
         result = sanity.get_long_term_insanity(sanity.phobias, sanity.manias)
@@ -708,7 +708,7 @@ class DicePlugin(Star):
             lines.append(f"{prefix}{item.name}: {item.init_value}")
         return "\n".join(lines)
 
-    @filter.command("init")
+    @filter.command(".init", alias=["。init", "/init"])
     async def initiative(self , event: AstrMessageEvent , instruction: str = None, player_name: str = None):
         """先攻列表管理"""
         group_id = event.get_group_id()
@@ -725,7 +725,7 @@ class DicePlugin(Star):
             self.remove_by_name(player_name, group_id)
             yield event.plain_result(f"已删除角色{player_name}的先攻")
 
-    @filter.command("ri")
+    @filter.command(".ri", alias=["。ri", "/ri"])
     async def roll_initiative(self , event: AstrMessageEvent, expr: str = None):
         """以调整值投掷先攻"""
         group_id = event.get_group_id()
@@ -757,7 +757,7 @@ class DicePlugin(Star):
         async for result in self.initiative(event):
             yield result
 
-    @filter.command("ed")
+    @filter.command(".ed", alias=["。ed", "/ed"])
     async def end_current_round(self , event: AstrMessageEvent):
         """结束当前回合，进入下一回合"""
         group_id = event.get_group_id()
@@ -771,14 +771,14 @@ class DicePlugin(Star):
     
     # ========================================================= #
 
-    @filter.command("name")
+    @filter.command(".name", alias=["。name", "/name"])
     async def generate_name(self, event: AstrMessageEvent, language: str = "cn", num: int = 5, sex: str = None):
         """随机生成一些名字"""
         names = generate_names(language=language, num=num, sex=sex)
         yield event.plain_result(get_output("generated_names", num = num, names=", ".join(names)))
 
     # ------------------ CoC角色生成 ------------------ #
-    @filter.command("coc")
+    @filter.command(".coc", alias=["。coc", "/coc"])
     async def generate_coc_character(self, event: AstrMessageEvent, x: int = 1):
         """coc角色生成"""
         characters = [roll_character() for _ in range(x)]
@@ -788,7 +788,7 @@ class DicePlugin(Star):
         yield event.plain_result(get_output("character_list.coc", characters="\n\n".join(results)))
 
     # ------------------ DnD角色生成 ------------------ #
-    @filter.command("dnd")
+    @filter.command(".dnd", alias=["。dnd", "/dnd"])
     async def generate_dnd_character(self, event: AstrMessageEvent, x: int = 1):
         """dnd角色生成"""
         characters = [roll_dnd_character() for _ in range(x)]
@@ -798,7 +798,7 @@ class DicePlugin(Star):
         yield event.plain_result(get_output("character_list.dnd", characters="\n\n".join(results)))
 
     # ------------------ fu相关指令 ------------------ #
-    @filter.command_group("fu")
+    @filter.command_group(".fu", alias=["。fu", "/fu"])
     async def fu(self, event: AstrMessageEvent):
         """最终物语 FU 相关指令组"""
         pass
@@ -821,7 +821,7 @@ class DicePlugin(Star):
         yield event.plain_result(result_text)
         
     # ======================== LOG相关 ============================= #
-    @filter.command_group("log")
+    @filter.command_group(".log", alias=["。log", "/log"])
     async def log(event: AstrMessageEvent):
         """"日志管理相关指令"""
         pass
@@ -898,36 +898,38 @@ class DicePlugin(Star):
     # ======================== LOG相关 ============================= #
     
     # 注册指令 /dicehelp
-    @filter.command("dicehelp")
+    @filter.command(".dicehelp", alias=["。dicehelp", "/dicehelp"])
     async def help ( self , event: AstrMessageEvent):
         """获取骰子指令"""
         help_text = (
             "欢迎使用掷骰服务，下面是该服务使用说明和示例，希望能够为您提供帮助……\n\n"
+            "下面的指令中，[]内的内容表示可选项或需要替换的参数，/表示参数选项，参数之间用空格分隔。\n"
+            "指令可使用.或/或。开头，参数之间使用空格分隔。\n\n"
             "基础掷骰\n"
-            "r 1d100 - 掷 1 个 100 面骰\n"
-            "r 3d6+2d4-1d8 - 掷 3 个 6 面骰 + 2 个 4 面骰 - 1 个 8 面骰\n"
-            "r 3#1d20 - 掷 1d20 骰 3 次\n\n"
+            ".r 1d100 - 掷 1 个 100 面骰\n"
+            ".r 3d6+2d4-1d8 - 掷 3 个 6 面骰 + 2 个 4 面骰 - 1 个 8 面骰\n"
+            ".r 3#1d20 - 掷 1d20 骰 3 次\n\n"
             
             "人物卡管理\n"
-            "pc create 名称 属性值 - 创建人物卡\n"
-            "pc show - 显示当前人物卡\n"
-            "pc list - 列出所有人物卡\n"
-            "pc change 名称 - 切换当前人物卡\n"
-            "pc update 属性 值/公式 - 更新人物卡属性\n"
-            "pc delete 名称 - 删除人物卡\n\n"
+            ".pc create 名称 属性值 - 创建人物卡\n"
+            ".pc show - 显示当前人物卡\n"
+            ".pc list - 列出所有人物卡\n"
+            ".pc change 名称 - 切换当前人物卡\n"
+            ".pc update 属性 值/公式 - 更新人物卡属性\n"
+            ".pc delete 名称 - 删除人物卡\n\n"
             
             "CoC 相关\n"
-            "coc x - 生成 x 个 CoC 角色数据\n"
-            "ra 技能名 - 进行技能骰\n"
-            "rap n 技能名 - 带 n 个惩罚骰的技能骰\n"
-            "rab n 技能名 - 带 n 个奖励骰的技能骰\n"
-            "sc 1d6/1d10 - 进行 San Check\n"
-            "ti - 生成临时疯狂症状\n"
-            "li - 生成长期疯狂症状\n"
-            "en 技能名 [技能值] - 技能成长\n"
-            "st 属性名 [属性值] - 属性成长，支持掷骰\n"
-            "name [cn/en/jp] [数量] - 随机生成名字\n"
-            "setcoc 规则编号 - 设置COC规则\n"
+            ".coc x - 生成 x 个 CoC 角色数据\n"
+            ".ra 技能名 - 进行技能骰\n"
+            ".rap n 技能名 - 带 n 个惩罚骰的技能骰\n"
+            ".rab n 技能名 - 带 n 个奖励骰的技能骰\n"
+            ".sc 1d6/1d10 - 进行 San Check\n"
+            ".ti - 生成临时疯狂症状\n"
+            ".li - 生成长期疯狂症状\n"
+            ".en 技能名 [技能值] - 技能成长\n"
+            ".st 属性名 [属性值] - 属性成长，支持掷骰\n"
+            ".name [cn/en/jp] [数量] - 随机生成名字\n"
+            ".setcoc 规则编号 - 设置COC规则\n\n"
 
             "规则编号说明：\n"
                 "1 - 严格规则（大成功1，大失败100）（默认规则）\n"
@@ -936,50 +938,50 @@ class DicePlugin(Star):
                 "4 - 宽松规则（大成功1~5，大失败96~100）\n\n"
             
             "DnD 相关\n"
-            "dnd x - 生成 x 个 DnD 角色属性\n"
-            "init - 显示当前先攻列表\n"
-            "init clr - 清空先攻列表\n"
-            "init del [角色名] - 删除角色先攻（默认为用户名） \n"
-            "ri +/- x - 以x的调整值投掷先攻\n"
-            "ri x [角色名] - 将角色（默认为用户名）的先攻设置为x\n"
-            "ed - 结束当前回合\n"
-            "fireball n - 施放 n 环火球术，计算伤害\n\n"
+            ".dnd x - 生成 x 个 DnD 角色属性\n"
+            ".init - 显示当前先攻列表\n"
+            ".init clr - 清空先攻列表\n"
+            ".init del [角色名] - 删除角色先攻（默认为用户名） \n"
+            ".ri +/- x - 以x的调整值投掷先攻\n"
+            ".ri x [角色名] - 将角色（默认为用户名）的先攻设置为x\n"
+            ".ed - 结束当前回合\n"
+            ".fireball n - 施放 n 环火球术，计算伤害\n\n"
 
             "其他规则\n"
-            "rv 骰子数量 难度 - 进行吸血鬼规则掷骰判定\n\n"
+            ".rv 骰子数量 难度 - 进行吸血鬼规则掷骰判定\n\n"
 
             "fu相关\n"
-            "fu check 属性1 属性2 难度 - 进行 FU 检定，属性可以是属性名（会从当前人物卡读取）或直接填数值（表示该属性的数值/骰面）\n\n"
+            ".fu check 属性1 属性2 难度 - 进行 FU 检定，属性可以是属性名（会从当前人物卡读取）或直接填数值（表示该属性的数值/骰面）\n\n"
             
             "娱乐指令\n"
-            "jrrp - 掷人品骰，返回0-100的随机数，并给出人品评价\n\n"
+            ".jrrp - 掷人品骰，返回0-100的随机数，并给出人品评价\n\n"
 
             "Log 管理\n"
-            "log new <日志名> - 开始新的日志会话\n"
-            "log off - 暂停当前的日志会话\n"
-            "log on - 开始当前的日志会话\n"
-            "log end - 结束当前的日志会话\n"
-            "log del <日志名> - 删除日志会话\n"
-            "log get <日志名> - 获取日志会话\n"
-            "log stat <日志名> - 获取日志会话统计信息\n"
+            ".log new <日志名> - 开始新的日志会话\n"
+            ".log off - 暂停当前的日志会话\n"
+            ".log on - 开始当前的日志会话\n"
+            ".log end - 结束当前的日志会话\n"
+            ".log del <日志名> - 删除日志会话\n"
+            ".log get <日志名> - 获取日志会话\n"
+            ".log stat <日志名> - 获取日志会话统计信息\n"
         )
 
         yield event.plain_result(help_text)
         
-    @filter.command("fireball")
+    @filter.command(".fireball", alias=["。fireball", "/fireball"])
     async def fireball_cmd(self, event: AstrMessageEvent, ring: int = 3):
         """施放火球术，计算伤害"""
         result = dice_mod.fireball(ring)
         yield event.plain_result(result)
 
-    @filter.command("jrrp")
+    @filter.command(".jrrp", alias=["。jrrp", "/jrrp"])
     async def roll_RP_cmd(self, event: AstrMessageEvent):
         """ jrrp 人品骰，返回0-100的随机数，并给出人品评价"""
         user_id = event.get_sender_id()
         result = dice_mod.roll_RP(user_id)
         yield event.plain_result(result)
 
-    @filter.command("setcoc")
+    @filter.command(".setcoc", alias=["。setcoc", "/setcoc"])
     async def setcoc_cmd(self, event: AstrMessageEvent, command: str = " "):
         """设置coc规则"""
         group_id = event.get_group_id()
@@ -989,7 +991,7 @@ class DicePlugin(Star):
     
     # 识别所有信息
     @event_message_type(EventMessageType.GROUP_MESSAGE)
-    async def identify_command(self, event: AstrMessageEvent): 
+    async def identify_command(self, event: AstrMessageEvent):
 
         message = event.message_obj.message_str
         
@@ -1037,7 +1039,7 @@ class DicePlugin(Star):
         skill_value = ""
         dice_count = "1"
         
-        if cmd[0:2] == "en":
+        if cmd[1:3] == "en":
             sv_match = re.search(r'\d+$', compact)
             if sv_match:
                 skill_value = sv_match.group()
@@ -1047,7 +1049,7 @@ class DicePlugin(Star):
                 skill_value = None
                 expr = compact[2:]
                 cmd = "en"
-        if cmd[0:2] == "ra":
+        if cmd[1:3] == "ra":
             sv_match = re.search(r'\d+$', compact)
             if sv_match:
                 skill_value = sv_match.group()
@@ -1075,7 +1077,7 @@ class DicePlugin(Star):
             if not expr and skill_value:
                 expr = skill_value
                 
-        elif cmd[0:2] == "rd":
+        elif cmd[1:3] == "rd":
             raw_rd = raw[2:].strip()
             dice_match = re.match(r'(\d+)', raw_rd)
 
@@ -1087,7 +1089,7 @@ class DicePlugin(Star):
                 expr = "1d100"
                 remark = raw_rd.strip()
                 
-        elif cmd[0] == "r":
+        elif cmd[1:2] == "r":
             # 在原始尾部中查找骰子表达式，无论用户是否在表达式前后加空格
             dice_match = re.search(r'([0-9]*[dD][0-9]+)', raw)
             if dice_match:
@@ -1128,7 +1130,7 @@ class DicePlugin(Star):
             async for result in self.roll_initiative(event, expr):
                 yield result
                 
-    # # log save    
+    # # log save
     # @command_group("log")
     # async def log(self, event: AstrMessageEvent, command: str = None):
     #     if command == 'on':
