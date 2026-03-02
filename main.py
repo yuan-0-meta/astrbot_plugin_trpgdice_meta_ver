@@ -1104,7 +1104,7 @@ class DicePlugin(Star):
             else:
                 expr = raw.strip()
                 remark = None
-                cmd = "r"
+                cmd = "rd"
                 
         # result_message = (f"m={m},message={message},cmd={cmd},expr={expr}.")
         # yield event.plain_result(result_message)
