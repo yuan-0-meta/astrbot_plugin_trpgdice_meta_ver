@@ -1,7 +1,10 @@
 output:
   # ---------- 技能判定 ----------
   skill_check:
-    normal: "已经对 <{name}> 进行了【{skill_name}】检定……结果是 {roll_result}/{skill_value} → {result}"
+    normal: 
+      - "已经对 <{name}> 进行了【{skill_name}】检定……结果是 {roll_result}/{skill_value} → {result}"
+      - "<{name}> 的【{skill_name}】检定结果是 {roll_result}/{skill_value} → {result}"
+      - "【{skill_name}】检定完成，<{name}> 的结果是 {roll_result}/{skill_value} → {result}"
     penalty: "<{name}> 惩罚骰: {new_tens_digits} → 最终结果: {final_y}/{skill_value} → {result}"
     bonus: "<{name}> 奖励骰: {new_tens_digits} → 最终结果: {final_y}/{skill_value} → {result}"
     error:
@@ -26,22 +29,47 @@ output:
   coc_roll:
     set_rule: "已设置大成功/大失败规则: {rule}"
     results:
-      great_success: "大成功"
-      extreme_success: "极难成功"
-      hard_success: "困难成功"
-      success: "成功"
-      great_failure: "大失败"
-      failure: "失败"
-      error: "错误: {error}"
-      reset: "判定规则已重置为 {rule}"
+      great_success: 
+        - "大成功\n这样的结果，正是你所需要的吗？我很期待你接下来的表现。"
+        - "大成功\n恭喜啊……或许这就是幸运女神的眷顾？"
+        - "大成功\n不错嘛，就连我也有点期待你的未来了啊！"
+        - "大成功\n这绝对是一个好兆头哦，这句可是真心的夸奖。"
+      extreme_success: 
+        - "极难成功\n惊险的成功……你成功了，但也可能付出了不小的代价哦？"
+        - "极难成功\n虽然结果不错……但是你又付出了多少代价呢？\n或者说，这样的结果真的值得吗？"
+        - "极难成功\n居然成功了啊……但也可能会带来一些麻烦？\n或者以你的聪明才智……也不一定？"
+      hard_success: 
+        - "困难成功\n你确实成功了……但是代价是什么呢……？\n你啊，又能否承受得起这个代价呢？"
+        - "困难成功\n虽然结果不错……但也可能会带来一些麻烦？\n或许也不一定？"
+        - "困难成功\n成功了啊……但也可能会带来一些麻烦？\n或者以你的聪明才智……倒也能化险为夷？"
+      success: 
+        - "成功\n不错的成功……怎么了，偶尔还是得夸一下你嘛。"
+        - "成功\n预料之中的胜利……我是说，我的预料之中。"
+        - "成功\n不必太得意哦？毕竟旅途才刚刚开始嘛。"
+        - "成功\n虽然结果可能并不完全如你所愿……但也算是不错的开始了？"
+      great_failure: 
+        - "大失败\n真可惜啊……结果可能比你预想的还要糟糕。"
+        - "大失败\n虽然令人失望，但也在意料之中……啊，说的还是“我的”预料之中哦。"
+        - "大失败\n希望这不会是你的终点……我可是很期待你接下来的故事的。"
+        - "大失败\n别太沮丧了？毕竟冒险的魅力之一就是充满了未知和挑战嘛。"
+      failure: 
+        - "失败\n也不必太沮丧哦？毕竟失败也是冒险的一部分嘛。"
+        - "失败\n虽然可能不太理想，但也不失为一次宝贵的经历？"
+        - "失败\n或许你感到失望……但也可能是一个转机的开始哦？"
+        - "失败\n真遗憾哪……好吧，被你发现了，其实我并没有遗憾。"
+
+      error: "出错了！ {error}\n嘛……趁着没人修理我先休息一下……"
+      reset: "判定规则已重置，为 {rule}"
 
   # ---------- 人格卡操作 ----------
   pc:
     create:
-      duplicate: 
-        - "人物卡 [{name}] 已存在，请不要重复创建啊，如果需要切换到它，使用 .pc change {name} 就好了"
-        - "档案库里已经有一个叫 [{name}] 的人物卡了哦，如果要切换到它，直接 .pc change {name} 就行了"
-      success: "人物卡 [{name}] 已创建 (ID: {id})，不要忘了切换到它哦 (.pc change {name})"
+      duplicate:
+        - "人物 [{name}] 已经登记过了，请不要重复登记啊……如果需要切换到它，使用 .pc change {name} 就好了。"
+        - "档案库里已经有一个叫 [{name}] 的人物卡了，如果要切换到它，请使用 .pc change {name} 。"
+      success:
+        - "已经为你登记了一个名为 [{name}] 的人物卡，(ID: {id})，记得切换到它进行操作 (.pc change {name})。"
+        - "档案库已新建名为 [{name}] 的人物卡 (ID: {id})，不要忘了切换到它 (.pc change {name})！"
     show:
       no_active: "未选择人物卡 (.pc change)"
       load_fail: "人物卡 ID {id} 不存在"
@@ -52,8 +80,13 @@ output:
       empty: "无人物卡"
       result: "{list}"
     change:
-      missing: "人物卡 [{name}] 不存在"
-      success: "已切换到人物卡 [{name}]"
+      missing: 
+        - "人物 [{name}] 还没有登记过，要先创建它吗？使用 .pc create {name} 来登记人物卡。"
+        - "档案库里没有找到 [{name}] 的人物卡……要先创建吗？使用 .pc create {name} 来创建新的档案。"
+      success: 
+        - "已为您切换到人物 [{name}]。"
+        - "已切换人物，欢迎您，[{name}]。"
+        - "人物已切换，[{name}]，等待您的下一步指示。"
     update:
       no_active: "未选择人物卡 (.pc change)"
       error_format: "格式错误，示例: 力量+1"
@@ -78,13 +111,15 @@ output:
     normal:
       success:
         - "让我看看…… <{name}> 此次投掷的结果是 {result} 。"
-        - "咔哒咔哒，掷骰完成， <{name}> 扔出了 {result} 点。"
-        - "由 <{name}> 发起的掷骰完成了！ 这次的结果是 {result} 呢。"
+        - "咔哒咔哒……掷骰完成， <{name}> 扔出了 {result} 点。"
+        - "骰子停下了…… <{name}> 的结果是 {result} 。\n骰子已经决定了命运，接下来就看你的行动了哦。"
+        - "<{name}> 掷骰的结果……是 {result} 。\n无论结果如何，都请好好利用眼前的机会。"
+        - "由 <{name}> 发起的掷骰完成了，这次的结果是 {result} 呢。\n这样的结果，是你所期望的吗？"
       success_remark:
         - "扔一个 {remark} 骰子吗…… <{name}> 的投掷结果是 {result} 哦。"
         - "<{name}> 扔出的 {remark} 骰子结果是…… {result} ！"
-        - "{remark} 骰子已经掷好了！ <{name}> 的结果是 {result} 。"
-        - "……<{name}> 要扔一个 {remark} 骰子吗？ 掷骰完成了，结果是 {result} 哦。"
+        - "{remark} 骰子已经掷好了, <{name}> 的结果是 {result} 。\n继续前进吧，前方的路还很长呢。"
+        - "……<{name}> 要扔一个 {remark} 骰子吗？ 掷骰完成了，结果是 {result} 哦。\n希望这个结果能帮到你？啊，其实帮不上忙倒是也无所谓(笑)……"
         - "由 <{name}> 发起的 {remark} 掷骰已完成， 结果是 {result} 。\n这样的结果，也在你的预料之中吗？"
       error: 
         - "哎呀……出错了！错误原因: {error}\n在有人修理之前，要不我先休息一下……？"
@@ -93,11 +128,13 @@ output:
       success: "{name} 的结果: {result}"
       error: "吸血鬼掷骰错误: {error}"
     hidden:
-      success: "隐藏掷骰结果: {result}"
+      success: 
+        - "隐藏掷骰结果: {result}\n只有你能看到这个结果哦……"
+        - "隐藏掷骰结果: {result}\n嘘……这可是我们之间的……秘密？"
       error: "隐藏掷骰错误: {error}"
       group: "已进行隐藏掷骰"
     detail: "掷骰详情: {detail}"
-    expression_error: "表达式错误: {error}"
+    expression_error: "表达式错误: {error}\n请检查你的输入，确保它符合掷骰表达式的格式要求。"
 
   # ---------- 最终物语 FU ----------
   fu:
