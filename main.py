@@ -1092,7 +1092,12 @@ class DicePlugin(Star):
                 expr = "1d100"
                 remark = raw_rd.strip()
                 cmd = "rd"
-                
+        
+        elif cmd[0:2] == "rh":
+            expr = "1d100"
+            remark = raw[2:].strip()
+            cmd = "rh"
+
         elif cmd[0] == "r":
             # 在原始尾部中查找骰子表达式，无论用户是否在表达式前后加空格
             dice_match = re.search(r'([0-9]*[dD][0-9]+(?:[+-][0-9]*[dD][0-9]+)*)', raw)
@@ -1102,7 +1107,7 @@ class DicePlugin(Star):
                 remark = dice_match.group(0).strip()
                 cmd = "r"
             else:
-                expr = raw.strip()
+                expr = "1d100"
                 remark = None
                 cmd = "rd"
                 
