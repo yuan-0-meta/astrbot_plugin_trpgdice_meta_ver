@@ -1078,7 +1078,7 @@ class DicePlugin(Star):
         if cmd[0:2] == "en":
             sv_match = re.search(r'((?:[0-9]*[dD][0-9]+(?:[+-][0-9]*[dD][0-9]+)*)+)$', compact) # 检索紧凑串中是否有骰子表达式，支持技能成长中直接掷骰子确定成长值
             if sv_match:
-                skill_value = sv_match.group()
+                skill_value = sv_match.group(1)
                 expr = compact[2:len(compact)-len(skill_value)]
                 cmd = "en"
             else:
@@ -1089,7 +1089,7 @@ class DicePlugin(Star):
             sv_match = re.search(r'((?:[0-9]*[dD][0-9]+(?:[+-][0-9]*[dD][0-9]+)*)+)$', compact)
 
             if sv_match:
-                skill_value = sv_match.group()
+                skill_value = sv_match.group(1)
                 expr = compact[2:len(compact)-len(skill_value)]
                 cmd = "ra"
             else:
@@ -1128,9 +1128,9 @@ class DicePlugin(Star):
         elif cmd[0:2] == "rd":
             raw_rd = raw[2:].strip()
             dice_match = re.search(r'([0-9]+(?:[+-][0-9]*[dD][0-9]+)*)', raw_rd)
-            dice_count = re.search(r'([0-9]+)#', raw)
-            if dice_count:
-                dice_count = dice_count.group(1)
+            dice_count_match = re.search(r'([0-9]+)#', raw)
+            if dice_count_match:
+                dice_count = dice_count_match.group(1)
             else:
                 dice_count = "1"
 
@@ -1152,9 +1152,9 @@ class DicePlugin(Star):
         elif cmd[0] == "r":
             # 在原始尾部中查找骰子表达式，无论用户是否在表达式前后加空格
             dice_match = re.search(r'([0-9]*[dD][0-9]+(?:[+-][0-9]*[dD][0-9]+)*)', raw)
-            dice_count = re.search(r'([0-9]+)#', raw)
-            if dice_count:
-                dice_count = dice_count.group(1)
+            dice_count_match = re.search(r'([0-9]+)#', raw)
+            if dice_count_match:
+                dice_count = dice_count_match.group(1)
             else:
                 dice_count = "1"
             
