@@ -1173,13 +1173,11 @@ class DicePlugin(Star):
         # yield event.plain_result(result_message)
 
         if cmd == "r":
-            for i in range(int(roll_times)):
-                async for result in self.handle_roll_dice(event, expr, remark):
-                    yield result
+            async for result in self.handle_roll_dice(event, expr, remark):
+                yield result
         elif cmd == "rd":
-            for i in range(int(roll_times)):
-                async for result in self.handle_roll_dice(event, expr, remark):
-                    yield result
+            async for result in self.handle_roll_dice(event, expr, remark):
+                yield result
         elif cmd == "rh":
             async for result in self.roll_hidden(event) :
                 yield result
