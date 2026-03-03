@@ -5,8 +5,8 @@ output:
       - "已经对 <{name}> 进行了【{skill_name}】检定，结果是 {roll_result}/{skill_value} → {result}"
       - "<{name}> 的【{skill_name}】检定结果是 {roll_result}/{skill_value} → {result}"
       - "【{skill_name}】检定完成，<{name}> 的结果是 {roll_result}/{skill_value} → {result}"
-    penalty: "<{name}> 惩罚骰: {new_tens_digits} → 最终结果: {final_y}/{skill_value} → {result}"
-    bonus: "<{name}> 奖励骰: {new_tens_digits} → 最终结果: {final_y}/{skill_value} → {result}"
+    penalty: "<{name}> 的【{skill_name}】惩罚骰: {new_tens_digits} → 最终结果: {final_y}/{skill_value} → {result}"
+    bonus: "<{name}> 的【{skill_name}】奖励骰: {new_tens_digits} → 最终结果: {final_y}/{skill_value} → {result}"
     error:
       normal: "关于技能 【{skill_name}】 的参数有问题……要不要先检查一下输入的信息？"
       penalty: "惩罚骰参数错误: 技能 {skill_name}"

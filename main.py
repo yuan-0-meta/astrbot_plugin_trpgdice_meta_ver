@@ -505,6 +505,7 @@ class DicePlugin(Star):
         await self.save_log(group_id = event.get_group_id(), content = result_message)
         yield event.plain_result(result_message)
 
+    # 随机值技能判定（技能值由系统随机生成，或使用提供的技能值）
     @filter.command("rad")
     async def roll_attribute_random(self, event: AstrMessageEvent, skill_name: str, skill_value: str = None):
         """随机值技能判定"""
@@ -512,12 +513,12 @@ class DicePlugin(Star):
         group_id = event.get_group_id()
 
         if skill_value is None:
-            skill_value = charmod.get_skill_value(user_id, skill_name)
+            skill_value = random.randint(1, 100)
 
         client = event.bot
         ret = await get_sender_nickname(client, group_id, user_id)
         ret = event.get_sender_name() if ret == "" else ret
-        result_message = dice_mod.roll_attribute_random(skill_name, skill_value, str(group_id), ret)
+        result_message = dice_mod.roll_attribute(skill_name, skill_value, str(group_id), ret)
 
         await self.save_log(group_id = event.get_group_id(), content = result_message)
         yield event.plain_result(result_message)
@@ -1075,7 +1076,7 @@ class DicePlugin(Star):
             cmd = "fu check"
 
         if cmd[0:2] == "en":
-            sv_match = re.search(r'([0-9]*[dD]*[0-9]+(?:[+-][0-9]*[dD][0-9]+)*)', compact) # 检索紧凑串中是否有骰子表达式，支持技能成长中直接掷骰子确定成长值
+            sv_match = re.search(r'((?:[0-9]*[dD][0-9]+(?:[+-][0-9]*[dD][0-9]+)*)+)$', compact) # 检索紧凑串中是否有骰子表达式，支持技能成长中直接掷骰子确定成长值
             if sv_match:
                 skill_value = sv_match.group()
                 expr = compact[2:len(compact)-len(skill_value)]
@@ -1085,7 +1086,8 @@ class DicePlugin(Star):
                 expr = compact[2:]
                 cmd = "en"
         if cmd[0:2] == "ra":
-            sv_match = re.search(r'([0-9]*[dD]*[0-9]+(?:[+-][0-9]*[dD][0-9]+)*)', compact)
+            sv_match = re.search(r'((?:[0-9]*[dD][0-9]+(?:[+-][0-9]*[dD][0-9]+)*)+)$', compact)
+
             if sv_match:
                 skill_value = sv_match.group()
                 expr = compact[2:len(compact)-len(skill_value)]
@@ -1099,7 +1101,7 @@ class DicePlugin(Star):
             if expr and (expr[0] == 'b' or expr[0] == 'p') :
                 cmd = cmd + expr[0]
                 expr = expr[1:]
-                dice_count_match = re.search(r'([0-9]*[dD][0-9]+(?:[+-][0-9]*[dD][0-9]+)*)', expr)
+                dice_count_match = re.search(r'([0-9]+)', expr)
                 if dice_count_match:
                     dice_count = dice_count_match.group()
                     expr = expr[dice_count_match.end():]
@@ -1112,10 +1114,10 @@ class DicePlugin(Star):
                     sv_match = re.search(r'([0-9]*[dD]*[0-9]+(?:[+-][0-9]*[dD][0-9]+)*)', compact)
                     if sv_match:
                         skill_value = sv_match.group()
-                        expr = compact[2:len(compact)-len(skill_value)]
+                        expr = compact[3:len(compact)-len(skill_value)]
                     else:
                         skill_value = random.randint(1,100) # 如果没有明确的技能值，默认使用 1d100 的随机结果作为技能值
-                        expr = compact[2:]
+                        expr = compact[3:]
 
             if expr.isdigit():
                 skill_value = expr
@@ -1126,6 +1128,11 @@ class DicePlugin(Star):
         elif cmd[0:2] == "rd":
             raw_rd = raw[2:].strip()
             dice_match = re.search(r'([0-9]+(?:[+-][0-9]*[dD][0-9]+)*)', raw_rd)
+            dice_count = re.search(r'([0-9]+)#', raw)
+            if dice_count:
+                dice_count = dice_count.group(1)
+            else:
+                dice_count = "1"
 
             if dice_match:
                 dice_size = dice_match.group(1)
@@ -1145,6 +1152,12 @@ class DicePlugin(Star):
         elif cmd[0] == "r":
             # 在原始尾部中查找骰子表达式，无论用户是否在表达式前后加空格
             dice_match = re.search(r'([0-9]*[dD][0-9]+(?:[+-][0-9]*[dD][0-9]+)*)', raw)
+            dice_count = re.search(r'([0-9]+)#', raw)
+            if dice_count:
+                dice_count = dice_count.group(1)
+            else:
+                dice_count = "1"
+            
             if dice_match:
                 expr = dice_match.group(1)
                 # 备注为骰子内容
