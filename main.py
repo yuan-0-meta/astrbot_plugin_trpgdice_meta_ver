@@ -1128,12 +1128,12 @@ class DicePlugin(Star):
                 
         elif cmd[0:2] == "rd":
             raw_rd = raw[2:].strip()
-            dice_match = re.search(r'([0-9]+(?:[+-][0-9]*[dD][0-9]+)*)', raw_rd)
-            roll_times_match = re.search(r'([0-9]+)#', raw)
-            if roll_times_match:
-                roll_times = roll_times_match.group(1)
-            else:
-                roll_times = "1"
+            dice_match = re.search(r'([0-9]*[#]*[0-9]+(?:[+-][0-9]*[dD][0-9]+)*)', raw_rd)
+            # roll_times_match = re.search(r'([0-9]+)#', raw)
+            # if roll_times_match:
+            #     roll_times = roll_times_match.group(1)
+            # else:
+            #     roll_times = "1"
 
             if dice_match:
                 dice_size = dice_match.group(1)
@@ -1152,12 +1152,12 @@ class DicePlugin(Star):
 
         elif cmd[0] == "r":
             # 在原始尾部中查找骰子表达式，无论用户是否在表达式前后加空格
-            dice_match = re.search(r'([0-9]*[dD][0-9]+(?:[+-][0-9]*[dD][0-9]+)*)', raw)
-            roll_times_match = re.search(r'([0-9]+)#', raw)
-            if roll_times_match:
-                roll_times = roll_times_match.group(1)
-            else:
-                roll_times = "1"
+            dice_match = re.search(r'([0-9]*[#]*[0-9]*[dD][0-9]+(?:[+-][0-9]*[dD][0-9]+)*)', raw)
+            # roll_times_match = re.search(r'([0-9]+)#', raw)
+            # if roll_times_match:
+            #     roll_times = roll_times_match.group(1)
+            # else:
+            #     roll_times = "1"
             
             if dice_match:
                 expr = dice_match.group(1)
