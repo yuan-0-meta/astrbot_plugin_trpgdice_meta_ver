@@ -1039,6 +1039,7 @@ class DicePlugin(Star):
 
         random.seed(int(time.time() * 1000))
 
+        """监听用户是否输入含掷骰前缀的指令，实现快捷掷骰"""
         #如果没有消息以掷骰前缀开头，则不进行后续的掷骰识别处理
         if not any(message.startswith(prefix) for prefix in self.wakeup_prefix):
             return
@@ -1172,12 +1173,12 @@ class DicePlugin(Star):
         # yield event.plain_result(result_message)
 
         if cmd == "r":
-            async for result in self.handle_roll_dice(event, expr, remark):
-                for i in range(int(roll_times)):
+            for i in range(int(roll_times)):
+                async for result in self.handle_roll_dice(event, expr, remark):
                     yield result
         elif cmd == "rd":
-            async for result in self.handle_roll_dice(event, expr, remark):
-                for i in range(int(roll_times)):
+            for i in range(int(roll_times)):
+                async for result in self.handle_roll_dice(event, expr, remark):
                     yield result
         elif cmd == "rh":
             async for result in self.roll_hidden(event) :
