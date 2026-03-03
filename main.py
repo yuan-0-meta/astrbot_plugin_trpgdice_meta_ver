@@ -505,6 +505,22 @@ class DicePlugin(Star):
         await self.save_log(group_id = event.get_group_id(), content = result_message)
         yield event.plain_result(result_message)
 
+    @filter.command("rad")
+    async def roll_attribute_random(self, event: AstrMessageEvent, skill_name: str, skill_value: str = None):
+        """随机值技能判定"""
+        user_id = event.get_sender_id()
+        group_id = event.get_group_id()
+
+        if skill_value is None:
+            skill_value = charmod.get_skill_value(user_id, skill_name)
+
+        client = event.bot
+        ret = await get_sender_nickname(client, group_id, user_id)
+        ret = event.get_sender_name() if ret == "" else ret
+        result_message = dice_mod.roll_attribute_random(skill_name, skill_value, str(group_id), ret)
+
+        await self.save_log(group_id = event.get_group_id(), content = result_message)
+        yield event.plain_result(result_message)
         
     @filter.command("en")
     async def pc_grow_up(self, event: AstrMessageEvent, skill_name: str, skill_value: str = None):
@@ -904,35 +920,35 @@ class DicePlugin(Star):
         """获取骰子指令"""
         help_text = (
             "欢迎使用掷骰服务，下面是该服务使用说明和示例，希望能够为您提供帮助……\n\n"
-            "下面的指令中，[]内的内容表示可选项或需要替换的参数，/表示参数选项，参数之间用空格分隔。\n"
+            "下面的指令中，[]内的内容表示需要替换的参数，/表示参数选项，参数之间用空格分隔。\n"
             "指令可使用.或/或。开头。\n"
-            "也可通过@提及或回复消息的方式使用指令，系统会自动识别并执行，但请注意空格。\n\n"
+            "也可通过@提及或回复消息的方式使用指令，无需增加任何前缀，系统会自动识别并执行，但请注意空格。\n\n"
 
             "基础掷骰\n"
-            ".r 1d100 - 掷 1 个 100 面骰\n"
-            ".r 3d6+2d4-1d8 - 掷 3 个 6 面骰 + 2 个 4 面骰 - 1 个 8 面骰\n"
-            ".r 3#1d20 - 掷 1d20 骰 3 次\n\n"
+            "r 1d100 - 掷 1 个 100 面骰\n"
+            "r 3d6+2d4-1d8 - 掷 3 个 6 面骰 + 2 个 4 面骰 - 1 个 8 面骰\n"
+            "r 3#1d20 - 掷 1d20 骰 3 次\n\n"
             
             "人物卡管理\n"
-            ".pc create 名称 属性值 - 创建人物卡\n"
-            ".pc show - 显示当前人物卡\n"
-            ".pc list - 列出所有人物卡\n"
-            ".pc change 名称 - 切换当前人物卡\n"
-            ".pc update 属性 值/公式 - 更新人物卡属性\n"
-            ".pc delete 名称 - 删除人物卡\n\n"
+            "pc create 名称 属性值 - 创建人物卡\n"
+            "pc show - 显示当前人物卡\n"
+            "pc list - 列出所有人物卡\n"
+            "pc change 名称 - 切换当前人物卡\n"
+            "pc update 属性 值/公式 - 更新人物卡属性\n"
+            "pc delete 名称 - 删除人物卡\n\n"
             
             "CoC 相关\n"
-            ".coc x - 生成 x 个 CoC 角色数据\n"
-            ".ra 技能名 - 进行技能骰\n"
-            ".rap n 技能名 - 带 n 个惩罚骰的技能骰\n"
-            ".rab n 技能名 - 带 n 个奖励骰的技能骰\n"
-            ".sc 1d6/1d10 - 进行 San Check\n"
-            ".ti - 生成临时疯狂症状\n"
-            ".li - 生成长期疯狂症状\n"
-            ".en 技能名 [技能值] - 技能成长\n"
-            ".st 属性名 [属性值] - 属性成长，支持掷骰\n"
-            ".name [cn/en/jp] [数量] - 随机生成名字\n"
-            ".setcoc 规则编号 - 设置COC规则\n\n"
+            "coc x - 生成 x 个 CoC 角色数据\n"
+            "ra 技能名 - 进行技能骰\n"
+            "rap n 技能名 - 带 n 个惩罚骰的技能骰\n"
+            "rab n 技能名 - 带 n 个奖励骰的技能骰\n"
+            "sc 1d6/1d10 - 进行 San Check\n"
+            "ti - 生成临时疯狂症状\n"
+            "li - 生成长期疯狂症状\n"
+            "en 技能名 [技能值] - 技能成长\n"
+            "st 属性名 [属性值] - 属性成长，支持掷骰\n"
+            "name [cn/en/jp] [数量] - 随机生成名字\n"
+            "setcoc 规则编号 - 设置COC规则\n\n"
 
             "规则编号说明：\n"
                 "1 - 严格规则（大成功1，大失败100）（默认规则）\n"
@@ -941,32 +957,32 @@ class DicePlugin(Star):
                 "4 - 宽松规则（大成功1~5，大失败96~100）\n\n"
             
             "DnD 相关\n"
-            ".dnd x - 生成 x 个 DnD 角色属性\n"
-            ".init - 显示当前先攻列表\n"
-            ".init clr - 清空先攻列表\n"
-            ".init del [角色名] - 删除角色先攻（默认为用户名） \n"
-            ".ri +/- x - 以x的调整值投掷先攻\n"
-            ".ri x [角色名] - 将角色（默认为用户名）的先攻设置为x\n"
-            ".ed - 结束当前回合\n"
-            ".fireball n - 施放 n 环火球术，计算伤害\n\n"
+            "dnd x - 生成 x 个 DnD 角色属性\n"
+            "init - 显示当前先攻列表\n"
+            "init clr - 清空先攻列表\n"
+            "init del [角色名] - 删除角色先攻（默认为用户名） \n"
+            "ri +/- x - 以x的调整值投掷先攻\n"
+            "ri x [角色名] - 将角色（默认为用户名）的先攻设置为x\n"
+            "ed - 结束当前回合\n"
+            "fireball n - 施放 n 环火球术，计算伤害\n\n"
 
             "其他规则\n"
-            ".rv 骰子数量 难度 - 进行吸血鬼规则掷骰判定\n\n"
+            "rv 骰子数量 难度 - 进行吸血鬼规则掷骰判定\n\n"
 
             "fu相关\n"
-            ".fu check 属性1 属性2 难度 - 进行 FU 检定，属性可以是属性名（会从当前人物卡读取）或直接填数值（表示该属性的数值/骰面）\n\n"
+            "fu check 属性1 属性2 难度 - 进行 FU 检定，属性可以是属性名（会从当前人物卡读取）或直接填数值（表示该属性的数值/骰面）\n\n"
             
             "娱乐指令\n"
-            ".jrrp - 掷人品骰，返回0-100的随机数，并给出人品评价\n\n"
+            "jrrp - 掷人品骰，返回0-100的随机数，并给出人品评价\n\n"
 
             "Log 管理\n"
-            ".log new <日志名> - 开始新的日志会话\n"
-            ".log off - 暂停当前的日志会话\n"
-            ".log on - 开始当前的日志会话\n"
-            ".log end - 结束当前的日志会话\n"
-            ".log del <日志名> - 删除日志会话\n"
-            ".log get <日志名> - 获取日志会话\n"
-            ".log stat <日志名> - 获取日志会话统计信息\n"
+            "log new <日志名> - 开始新的日志会话\n"
+            "log off - 暂停当前的日志会话\n"
+            "log on - 开始当前的日志会话\n"
+            "log end - 结束当前的日志会话\n"
+            "log del <日志名> - 删除日志会话\n"
+            "log get <日志名> - 获取日志会话\n"
+            "log stat <日志名> - 获取日志会话统计信息\n"
         )
 
         yield event.plain_result(help_text)
@@ -1089,7 +1105,18 @@ class DicePlugin(Star):
                     expr = expr[dice_count_match.end():]
                 else:
                     dice_count = "1"
-                    
+            
+            elif expr and (expr[0] == 'd' or expr[0] == 'D') :
+                    cmd = cmd + 'd'
+                    expr = expr[1:]
+                    sv_match = re.search(r'([0-9]*[dD]*[0-9]+(?:[+-][0-9]*[dD][0-9]+)*)', compact)
+                    if sv_match:
+                        skill_value = sv_match.group()
+                        expr = compact[2:len(compact)-len(skill_value)]
+                    else:
+                        skill_value = random.randint(1,100) # 如果没有明确的技能值，默认使用 1d100 的随机结果作为技能值
+                        expr = compact[2:]
+
             if expr.isdigit():
                 skill_value = expr
                 
@@ -1134,7 +1161,6 @@ class DicePlugin(Star):
         if cmd == "r":
             async for result in self.handle_roll_dice(event, expr, remark):
                 yield result
-                yield event.plain_result("如果需要查询指令帮助，请使用 .dicehelp 指令")
         elif cmd == "rd":
             async for result in self.handle_roll_dice(event, expr, remark):
                 yield result
@@ -1146,6 +1172,9 @@ class DicePlugin(Star):
                 yield result
         elif cmd == "rap":
             async for result in self.roll_attribute_penalty(event, dice_count, expr, skill_value):
+                yield result
+        elif cmd == "rad":
+            async for result in self.roll_attribute(event, expr, skill_value):
                 yield result
         elif cmd == "ra":
             async for result in self.roll_attribute(event, expr, skill_value):
@@ -1166,6 +1195,9 @@ class DicePlugin(Star):
                 yield result
         elif cmd == "fu check":
             async for result in self.fu_check_command(event, attr1, attr2, difficulty):
+                yield result
+        elif cmd == "jrrp":
+            async for result in self.roll_RP_cmd(event):
                 yield result
                 
     # # log save
