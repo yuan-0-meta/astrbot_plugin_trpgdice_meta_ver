@@ -5,10 +5,10 @@ output:
       - "对 <{name}> 进行了【{skill_name}】检定，结果是：\n {roll_result}/{skill_value} → {result}"
       - "<{name}> 的【{skill_name}】检定结果是：\n {roll_result}/{skill_value} → {result}"
       - "<{name}> 的【{skill_name}】检定完成，结果是：\n {roll_result}/{skill_value} → {result}"
-    penalty: "<{name}> 的【{skill_name}】惩罚骰：\n {new_tens_digits} → 最终结果：\n {final_y}/{skill_value} → {result}"
-    bonus: "<{name}> 的【{skill_name}】奖励骰：\n {new_tens_digits} → 最终结果：\n {final_y}/{skill_value} → {result}"
+    penalty: "<{name}> 的【{skill_name}】惩罚骰：\n {new_tens_digits} \n→ 最终结果：\n {final_y}/{skill_value} → {result}"
+    bonus: "<{name}> 的【{skill_name}】奖励骰：\n {new_tens_digits} \n→ 最终结果：\n {final_y}/{skill_value} → {result}"
     error:
-      normal: "关于技能 【{skill_name}】 的参数有问题……要不要先检查一下输入的信息？"
+      normal: "关于技能 【{skill_name}】 的参数有问题…… \n要不要先检查一下输入的信息？"
       penalty: "惩罚骰参数错误: 技能 【{skill_name}】\n———————————————\n-是想逃避惩罚吗？这可不行啊。还是好好检查一下输入的参数吧。"
       bonus: "奖励骰参数错误: 技能 【{skill_name}】\n———————————————\n-奖励骰可不是用来作弊的哦？还是好好检查一下输入的参数吧。"
     grow_up:
@@ -73,26 +73,26 @@ output:
   pc:
     create:
       duplicate:
-        - "人物 [{name}] 已经登记过了，请不要重复登记啊……如果需要切换到它，使用 .pc change {name} 就好了。"
-        - "档案库里已经有一个叫 [{name}] 的档案了，如果要切换到它，请使用 .pc change {name} 。"
+        - "人物 [{name}] 已经登记过了，请不要重复登记啊…… \n如果需要切换到它，使用 .pc change {name} 就好了。"
+        - "档案库里已经有一个叫 [{name}] 的档案了。 \n如果要切换到它，请使用 .pc change {name} 。"
       success:
-        - "已经为你登记了一个名为 [{name}] 的人物卡，(ID: {id})，记得切换到它进行操作 (.pc change {name})。"
-        - "档案库已新建名为 [{name}] 的档案 (ID: {id})，不要忘了切换到它 (.pc change {name})！"
+        - "已经为你登记了一个名为 [{name}] 的人物卡！ \n ID: {id} \n记得切换到它进行操作 (.pc change {name})。"
+        - "档案库已新建名为 [{name}] 的档案。 \n ID: {id} \n不要忘了切换到它 (.pc change {name})！"
     show:
-      no_active: "未选择人物卡 (.pc change)"
-      load_fail: "人物卡 ID {id} 不存在"
-      attr_missing: "属性 [{attribute}] 未找到"
+      no_active: "未选择人物卡 (.pc change)…… \n请先告诉我你想查看哪个人物卡！"
+      load_fail: "人物卡 ID {id} 不存在！…… \n要不要先创建一个呢？使用 .pc create {name} 来创建人物卡。"
+      attr_missing: "属性 [{attribute}] 未找到…… \n你只能查看已经登记过的属性哦？"
       attr: "{attr} = {value}"
       all: "{name}: {attributes}"
     list:
       empty:
-        - "还没有人物卡！要不要先创建一个呢？使用 .pc create {name} 来创建人物卡。"
-        - "档案库里空空如也……先创建一个人物卡？使用 .pc create {name} 来创建新的档案。"
+        - "还没有人物卡！要不要先创建一个呢？ \n使用 .pc create {name} 来创建人物卡。"
+        - "档案库里空空如也……先创建一个人物卡？ \n使用 .pc create {name} 来创建新的档案。"
       result: "{list}"
     change:
       missing:
-        - "人物 [{name}] 还没有登记过，要先创建它吗？使用 .pc create {name} 来登记人物卡。"
-        - "档案库里没有找到 [{name}] 的人物卡……要先创建吗？使用 .pc create {name} 来创建新的档案。"
+        - "人物 [{name}] 还没有登记过，要先创建它吗？ \n使用 .pc create {name} 来登记人物卡。"
+        - "档案库里没有找到 [{name}] 的人物卡……要先创建吗？ \n使用 .pc create {name} 来创建新的档案。"
       success:
         - "已为您切换到人物 [{name}]。"
         - "已切换人物，欢迎您，[{name}]。"
@@ -105,7 +105,7 @@ output:
     delete:
       fail:
         - "人物卡 [{name}] 不存在，不需要删除……"
-        - "档案 [{name}] 不存在，我可没法销毁不存在的东西……"
+        - "档案 [{name}] 不存在。我可没法销毁不存在的东西……"
       success:
         - "人物卡 [{name}] 已删除。"
         - "档案 [{name}] 已销毁。"

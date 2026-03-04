@@ -344,6 +344,8 @@ def roll_RP(user_id: str):
     """
     今日RP（运势），返回字符串。
     """
+    if user_id in ["元.0", "元", "1694730002", "小元同学"]:  # 我草权限狗无言了
+        return get_output("rp.today", rp=100)
     today = datetime.datetime.now().strftime("%Y-%m-%d")
     RP_str = f"{user_id}_{today}"
     hash = hashlib.sha256(RP_str.encode()).hexdigest()
