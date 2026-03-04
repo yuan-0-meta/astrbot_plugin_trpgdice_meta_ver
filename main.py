@@ -243,10 +243,6 @@ class DicePlugin(Star):
 
         yield event.plain_result(response)
 
-
-
-
-
     @command_group("pc")
     def pc(self):
         """pc人物卡相关指令"""
@@ -1240,7 +1236,12 @@ class DicePlugin(Star):
             async for result in self.roll_initiative(event, expr):
                 yield result
         elif cmd == "sn":
-            async for result in self.filter_set_nickname(event, expr):
+            await self.filter_set_nickname(event, expr)
+        elif cmd == "coc":
+            async for result in self.generate_coc_character(event, int(expr) if expr.isdigit() else 1):
+                yield result
+        elif cmd == "dnd":
+            async for result in self.generate_dnd_character(event, int(expr) if expr.isdigit() else 1):
                 yield result
         elif cmd == "fu check":
             async for result in self.fu_check_command(event, attr1, attr2, difficulty):
