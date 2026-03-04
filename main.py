@@ -1089,6 +1089,24 @@ class DicePlugin(Star):
                 sub_cmd = "delete"
                 expr = compact[len(cmd):].strip()
         
+        if cmd[0:3] == "coc":
+            # 提取"coc"后的子串，识别子命令（如 x）
+            expr = compact[3:].strip()  # expr 从 coc 后的文本开始
+            if expr.isdigit():
+                sub_cmd = "generate"
+                expr = int(expr)  # 将 x 转换为整数
+            else:
+                sub_cmd = None  # 如果没有提供数字参数，则 sub_cmd 设为 None
+        
+        if cmd[0:3] == "dnd":
+            # 提取"dnd"后的子串，识别子命令（如 x）
+            expr = compact[3:].strip()  # expr 从 dnd 后的文本开始
+            if expr.isdigit():
+                sub_cmd = "generate"
+                expr = int(expr)  # 将 x 转换为整数
+            else:
+                sub_cmd = None  # 如果没有提供数字参数，则 sub_cmd 设为 None
+        
         if cmd[0:7] == "fucheck":
             # 提取"check"后的子串（假设raw以"fucheck"开头，如"fucheck check a b c"）
             check_pos = raw.find("check") + len("check")  # 找到"check"的结束位置
