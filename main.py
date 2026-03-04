@@ -1065,31 +1065,32 @@ class DicePlugin(Star):
         dice_count = "1"
 
         if cmd[0:2] == "pc":
-            sub_cmd = raw[m.end():].strip().split()[0].lower() if len(raw[m.end():].strip().split()) > 0 else ""
-            if sub_cmd in ["create", "show", "list", "change", "update", "delete"]:
-                cmd = "pc" + sub_cmd  # 将 cmd 设置为 pc+子命令，如 pcshow、pcupdate 等
-                expr = compact[len(cmd):].strip()  # expr 从 pc+子命令后的文本开始
-                if sub_cmd == "update":
-                    # pc update 的特殊处理，expr 需要分为属性和数值两部分
-                    parts = expr.split(maxsplit=1)
-                    if len(parts) == 2:
-                        attr_name = parts[0]
-                        attr_value = parts[1]
-                        expr = (attr_name, attr_value)  # 将 expr 设置为一个元组，包含属性名和属性值
-                    else:
-                        expr = (parts[0], "")  # 如果没有提供属性值，则设置为空字符串
-                elif sub_cmd == "change":
-                    # pc change 的特殊处理，expr 需要是切换的人物卡名称
-                    expr = compact[len(cmd):].strip()  # expr 从 pc change 后的文本开始
-                elif sub_cmd == "delete":
-                    # pc delete 的特殊处理，expr 需要是删除的人物卡名称
-                    expr = compact[len(cmd):].strip()  # expr 从 pc delete 后的文本开始
-                elif sub_cmd in ["create", "show"]:
-                    # pc create/show 的特殊处理，expr 需要是人物卡名称（create 可以没有名称，默认为空字符串）
-                    expr = compact[len(cmd):].strip()  # expr 从 pc create/show 后的文本开始
-                elif sub_cmd == "list":
-                    # pc list 没有额外参数，expr 设为 None
-                    expr = None
+            # 提取"pc"后的子串，识别子命令（如 create、show、list、change、update、delete）
+            expr = compact[2:].strip()  # expr 从 pc 后的文本开始
+            if expr[0:6] == "create":
+                sub_cmd = "create"
+                expr = compact[len(cmd):].strip()
+            elif expr[0:4] == "show":
+                sub_cmd = "show"
+                expr = compact[len(cmd):].strip()
+            elif expr[0:4] == "list":
+                sub_cmd = "list"
+                expr = None  # pc list 没有额外参数，expr 设为 None
+            elif expr[0:6] == "change":
+                sub_cmd = "change"
+                expr = compact[len(cmd):].strip()
+            elif expr[0:6] == "update":
+                sub_cmd = "update"
+                parts = expr.split(maxsplit=1)
+                if len(parts) == 2:
+                    attr_name = parts[0]
+                    attr_value = parts[1]
+                    expr = (attr_name, attr_value)  # 将 expr 设置为一个元组，包含属性名和属性值
+                else:
+                    expr = (parts[0], "")  # 如果没有提供属性值，则设置为空字符串
+            elif expr[0:6] == "delete":
+                sub_cmd = "delete"
+                expr = compact[len(cmd):].strip()
         
         if cmd[0:7] == "fucheck":
             # 提取"check"后的子串（假设raw以"fucheck"开头，如"fucheck check a b c"）
@@ -1231,23 +1232,23 @@ class DicePlugin(Star):
             async for result in self.roll_RP_cmd(event):
                 yield result
         elif cmd[0:2] == "pc":
-            if cmd == "pccreate":
-                async for result in self.pc_create(event, expr):
+            if sub_cmd == "create":
+                async for result in self.pc_create_character(event, expr):
                     yield result
-            elif cmd == "pcshow":
-                async for result in self.pc_show(event):
+            elif sub_cmd == "show":
+                async for result in self.pc_show_character(event):
                     yield result
-            elif cmd == "pclist":
-                async for result in self.pc_list(event):
+            elif sub_cmd == "list":
+                async for result in self.pc_list_characters(event):
                     yield result
-            elif cmd == "pcchange":
-                async for result in self.pc_change(event, expr):
+            elif sub_cmd == "change":
+                async for result in self.pc_change_character(event, expr):
                     yield result
-            elif cmd == "pcupdate":
-                async for result in self.pc_update(event, expr):
+            elif sub_cmd == "update":
+                async for result in self.pc_update_character(event, attr_name, attr_value):
                     yield result
-            elif cmd == "pcdelete":
-                async for result in self.pc_delete(event, expr):
+            elif sub_cmd == "delete":
+                async for result in self.pc_delete_character(event, expr):
                     yield result
                 
     # # log save
