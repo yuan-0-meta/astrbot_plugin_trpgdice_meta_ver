@@ -1081,6 +1081,7 @@ class DicePlugin(Star):
                 expr = compact[len(cmd):].strip()
             elif expr[0:6] == "update":
                 sub_cmd = "update"
+                expr = compact[len(cmd):].strip()
                 attr_value = re.match(r'([0-9]*)$', expr)  # 尝试提取属性值（如果提供了纯数字作为属性值）
                 if attr_value:
                     attr_value = attr_value.group(1)
