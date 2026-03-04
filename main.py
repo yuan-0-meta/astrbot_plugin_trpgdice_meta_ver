@@ -1082,10 +1082,10 @@ class DicePlugin(Star):
             elif expr[0:6] == "update":
                 sub_cmd = "update"
                 expr = compact[len(cmd):].strip()
-                attr_value = re.match(r'([0-9]*)$', expr)  # 尝试提取属性值（如果提供了纯数字作为属性值）
-                if attr_value:
-                    attr_value = attr_value.group(1)
-                    attr_name = expr[:attr_value.start()]  # 属性名是属性值前的部分
+                attr_value_match = re.search(r'([0-9]*)$', expr)  # 尝试提取属性值（如果提供了纯数字作为属性值）
+                if attr_value_match:
+                    attr_value = attr_value_match.group(1)
+                    attr_name = expr[:attr_value_match.start()]  # 属性名是属性值前的部分
                 else:
                     attr_value = ""  # 如果没有提供属性值，则设置为空字符串
                     attr_name = expr  # 属性名是整个 expr
@@ -1104,6 +1104,17 @@ class DicePlugin(Star):
             difficulty = params[2] if len(params) > 2 else ""
     
             cmd = "fu check"
+
+        if cmd[0:2] == "st":
+            sv_match = re.search(r'(([0-9]*[dD]*[0-9]+(?:[+-][0-9]*[dD][0-9]+)*)+)$', compact) # 检索紧凑串中是否有骰子表达式，支持属性成长中直接掷骰子确定成长值
+            if sv_match:
+                skill_value = sv_match.group(1)
+                expr = compact[2:len(compact)-len(skill_value)]
+                cmd = "st"
+            else:
+                skill_value = None
+                expr = compact[2:]
+                cmd = "st"
 
         if cmd[0:2] == "en":
             sv_match = re.search(r'(([0-9]*[dD]*[0-9]+(?:[+-][0-9]*[dD][0-9]+)*)+)$', compact) # 检索紧凑串中是否有骰子表达式，支持技能成长中直接掷骰子确定成长值
@@ -1214,6 +1225,8 @@ class DicePlugin(Star):
                 yield result
         elif cmd == "en":
             await self.pc_grow_up(event, expr, skill_value)
+        elif cmd == "st":
+            await self.pc_grow_up(event, expr, skill_value, is_skill=False)
         elif cmd == "sc":
             async for result in self.pc_san_check(event, expr) :
                 yield result
@@ -1225,6 +1238,9 @@ class DicePlugin(Star):
                 yield result
         elif cmd == "ri":
             async for result in self.roll_initiative(event, expr):
+                yield result
+        elif cmd == "sn":
+            async for result in self.filter_set_nickname(event, expr):
                 yield result
         elif cmd == "fu check":
             async for result in self.fu_check_command(event, attr1, attr2, difficulty):
@@ -1249,7 +1265,7 @@ class DicePlugin(Star):
                 async for result in self.pc_update_character(event, attr_name, attr_value):
                     yield result
             elif sub_cmd == "delete":
-                async for result in self.pc_delete_character(event, expr):
+                async for result in self.pc_delete_character(event):
                     yield result
                 
     # # log save
