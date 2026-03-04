@@ -1081,13 +1081,13 @@ class DicePlugin(Star):
                 expr = compact[len(cmd):].strip()
             elif expr[0:6] == "update":
                 sub_cmd = "update"
-                parts = expr.split(maxsplit=1)
-                if len(parts) == 2:
-                    attr_name = parts[0]
-                    attr_value = parts[1]
-                    expr = (attr_name, attr_value)  # 将 expr 设置为一个元组，包含属性名和属性值
+                attr_value == re.match(r'([0-9]*)$', expr)  # 尝试提取属性值（如果提供了纯数字作为属性值）
+                if attr_value:
+                    attr_value = attr_value.group(1)
+                    attr_name = expr[:attr_value.start()]  # 属性名是属性值前的部分
                 else:
-                    expr = (parts[0], "")  # 如果没有提供属性值，则设置为空字符串
+                    attr_value = ""  # 如果没有提供属性值，则设置为空字符串
+                    attr_name = expr  # 属性名是整个 expr
             elif expr[0:6] == "delete":
                 sub_cmd = "delete"
                 expr = compact[len(cmd):].strip()
