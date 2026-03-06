@@ -1140,6 +1140,13 @@ class DicePlugin(Star):
                 skill_value = None
                 expr = compact[2:]
                 cmd = "en"
+            
+        if cmd[0:4] == "name":
+            # 提取"name"后的子串，识别参数（如语言、数量、性别）
+            expr = compact[4:].strip()  # expr 从 name 后的文本开始
+            parts = expr.split()
+            lan = parts[0] if len(parts) > 0 else "cn"
+            n = int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else 5
 
         if cmd[0:2] == "ra":
             sv_match = re.search(r'(([0-9]*[dD]*[0-9]+(?:[+-][0-9]*[dD][0-9]+)*)+)$', compact)
@@ -1266,6 +1273,9 @@ class DicePlugin(Star):
                 yield result
         elif cmd == "jrrp":
             async for result in self.roll_RP_cmd(event):
+                yield result
+        elif cmd[0:4] == "name":
+            async for result in self.generate_name(event, language=lan, num=n):
                 yield result
         elif cmd[0:2] == "pc":
             if sub_cmd == "create":
