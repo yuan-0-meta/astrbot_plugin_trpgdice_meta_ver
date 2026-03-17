@@ -1147,6 +1147,8 @@ class DicePlugin(Star):
             parts = expr.split()
             lan = parts[0] if len(parts) > 0 else "cn"
             n = int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else 5
+            sex = parts[2] if len(parts) > 2 else None
+            cmd = "name"
 
         if cmd[0:2] == "ra":
             sv_match = re.search(r'(([0-9]*[dD]*[0-9]+(?:[+-][0-9]*[dD][0-9]+)*)+)$', compact)
