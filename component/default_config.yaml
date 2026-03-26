@@ -164,6 +164,19 @@ output:
       fear_failure: "{name}：恐惧失败。\n {attribute1}({attribute2}) 掷出 {d1},{d2} → \n 希望({hope_attr}={hope}) \n 恐惧({fear_attr}={fear}) \n 总和 {total} / 难度 {difficulty}"
       tie: "{name}：平局（两骰点数相同）。\n {attribute1}({attribute2}) 掷出 {d1},{d2} → \n 总和 {total} / 难度 {difficulty}"
       error: "FU 检定错误： {error}"
+    mark:
+      create: "已创建命刻：{name}\n{bar} ({progress}/{length})"
+      show:
+        empty: "当前没有正在进行的命刻。"
+        list: "{text}"
+      advance:
+        updated: "{name}\n{bar} {status}"
+        invalid_delta: "推进值必须为整数：{delta}"
+        not_found: "未找到命刻：{identifier}"
+      delete:
+        removed: "已删除命刻：{name}"
+        removed_completed: "已删除 {count} 个已完成的命刻。"
+        not_found: "未找到命刻：{identifier}"
 
   # ---------- SAN 理智 ----------
   san:

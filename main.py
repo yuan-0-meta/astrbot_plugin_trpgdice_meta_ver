@@ -833,6 +833,62 @@ class DicePlugin(Star):
 
         await self.save_log(group_id=event.get_group_id(), content=result_text)
         yield event.plain_result(result_text)
+
+    @fu.command("mark")
+    async def fu_mark_command(self, event: AstrMessageEvent, action: str = None, arg1: str = None, arg2: str = None):
+        """命刻管理：.fu mark <create/show/advance/delete> ...
+        示例：
+        .fu mark create 名称 长度
+        .fu mark show
+        .fu mark advance 1 2
+        .fu mark delete 1
+        .fu mark delete 已完成
+        """
+        group_id = event.get_group_id()
+        user_id = event.get_sender_id()
+        # 规范化参数
+        a = (action or "").strip()
+        p1 = (arg1 or "").strip()
+        p2 = (arg2 or "").strip()
+
+        # 创建
+        if a.lower() in ("create", "add", "new"):
+            if not p1 or not p2:
+                text = "用法：.fu mark create 名称 长度"
+            else:
+                text = fu_mod.create_mark(p1, p2)
+
+        # 显示
+        elif a.lower() in ("show", "list"):
+            text = fu_mod.show_marks()
+
+        # 推进/回退
+        elif a.lower() in ("advance", "adv", "push", "inc", "推进", "进"):
+            if not p1 or not p2:
+                text = "用法：.fu mark advance 序号或名称 推进值(可负)"
+            else:
+                text = fu_mod.advance_mark(p1, p2)
+
+        # 删除
+        elif a.lower() in ("delete", "del", "remove", "rm", "删除"):
+            if not p1:
+                text = "用法：.fu mark delete 序号或名称；或 .fu mark delete 已完成"
+            else:
+                # 支持中文参数“已完成”直接传递
+                target = p1
+                text = fu_mod.delete_mark(target)
+
+        else:
+            text = (
+                "命刻指令：\n"
+                ".fu mark create 名称 长度 - 新增命刻\n"
+                ".fu mark show - 显示所有命刻\n"
+                ".fu mark advance 序号|名称 数值 - 推进或回退命刻\n"
+                ".fu mark delete 序号|名称 - 删除命刻；.fu mark delete 已完成 - 删除所有已完成命刻"
+            )
+
+        await self.save_log(group_id=group_id, content=text)
+        yield event.plain_result(text)
         
     # ======================== LOG相关 ============================= #
     @filter.command_group("log")
@@ -1119,6 +1175,17 @@ class DicePlugin(Star):
     
             cmd = "fu check"
 
+        if cmd[0:6] == "fumark":
+            # 提取"mark"后的子串（如 "fu mark create 名称 长度"）
+            mark_pos = raw.find("mark") + len("mark")
+            params = raw[mark_pos:].strip().split()
+
+            action = params[0] if len(params) > 0 else ""
+            arg1 = params[1] if len(params) > 1 else ""
+            arg2 = params[2] if len(params) > 2 else ""
+
+            cmd = "fu mark"
+
         if cmd[0:2] == "st":
             sv_match = re.search(r'(([0-9]*[dD]*[0-9]+(?:[+-][0-9]*[dD][0-9]+)*)+)$', compact) # 检索紧凑串中是否有骰子表达式，支持属性成长中直接掷骰子确定成长值
             if sv_match:
@@ -1272,6 +1339,9 @@ class DicePlugin(Star):
                 yield result
         elif cmd == "fu check":
             async for result in self.fu_check_command(event, attr1, attr2, difficulty):
+                yield result
+        elif cmd == "fu mark":
+            async for result in self.fu_mark_command(event, action if 'action' in locals() else None, arg1 if 'arg1' in locals() else None, arg2 if 'arg2' in locals() else None):
                 yield result
         elif cmd == "jrrp":
             async for result in self.roll_RP_cmd(event):
