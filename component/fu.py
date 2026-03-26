@@ -150,109 +150,106 @@ def fu_check(attr1: str, attr2: str, difficulty: int, user_id: str = None, name:
                 total=total,
                 difficulty=difficulty,
             )
-
-
-    # ----------------- 命刻系统（Marks） -----------------
+    # ----------------- 命刻系统 -----------------
     # 提供：新增命刻、显示命刻、推进/回退命刻、删除命刻
+class Mark:
+    def __init__(self, name: str, length: int):
+        self.name = str(name)
+        self.length = int(length)
+        self.progress = 0
 
-    class Mark:
-        def __init__(self, name: str, length: int):
-            self.name = str(name)
-            self.length = int(length)
-            self.progress = 0
-
-        def is_completed(self):
-            return self.progress >= self.length
-
-
-    # 全局命刻列表（按创建顺序）
-    marks = []  # list[Mark]
+    def is_completed(self):
+        return self.progress >= self.length
 
 
-    def _render_progress_bar(mark: Mark) -> str:
-        filled = max(0, min(mark.progress, mark.length))
-        empty = max(0, mark.length - filled)
-        # 实心方块/空心方块
-        return "".join(["■" for _ in range(filled)] + ["□" for _ in range(empty)])
+# 全局命刻列表（按创建顺序）
+marks = []  # list[Mark]
 
 
-    def create_mark(name: str, length: int) -> str:
-        """新增命刻，初始进度为0。返回确认信息字符串。"""
-        try:
-            length = int(length)
-        except Exception:
-            return get_output("fu.mark.advance.invalid_delta", delta=length)
-        if length <= 0:
-            return get_output("fu.mark.advance.invalid_delta", delta=length)
-        m = Mark(name, length)
-        marks.append(m)
-        return get_output("fu.mark.create", name=m.name, bar=_render_progress_bar(m), progress=m.progress, length=m.length)
+def _render_progress_bar(mark: Mark) -> str:
+    filled = max(0, min(mark.progress, mark.length))
+    empty = max(0, mark.length - filled)
+    # 实心方块/空心方块
+    return "".join(["■" for _ in range(filled)] + ["□" for _ in range(empty)])
 
 
-    def show_marks() -> str:
-        """显示当前所有命刻的状态。"""
-        if not marks:
-            return get_output("fu.mark.show.empty")
-        lines = []
-        for idx, m in enumerate(marks, start=1):
-            status = "(已完成)" if m.is_completed() else f"({m.progress}/{m.length})"
-            lines.append(f"{idx}. {m.name}\n{_render_progress_bar(m)} {status}")
-        return get_output("fu.mark.show.list", text="\n\n".join(lines))
+def create_mark(name: str, length: int) -> str:
+    """新增命刻，初始进度为0。返回确认信息字符串。"""
+    try:
+        length = int(length)
+    except Exception:
+        return get_output("fu.mark.advance.invalid_delta", delta=length)
+    if length <= 0:
+        return get_output("fu.mark.advance.invalid_delta", delta=length)
+    m = Mark(name, length)
+    marks.append(m)
+    return get_output("fu.mark.create", name=m.name, bar=_render_progress_bar(m), progress=m.progress, length=m.length)
 
 
-    def _find_mark(identifier):
-        """根据序号（1-based）或名称查找命刻，返回 (index, mark) 或 (None, None)。"""
-        if identifier is None:
-            return None, None
-        # 尝试按序号
-        try:
-            i = int(identifier)
-            if 1 <= i <= len(marks):
-                return i - 1, marks[i - 1]
-        except Exception:
-            pass
-        # 按名称匹配（精确匹配）
-        for i, m in enumerate(marks):
-            if m.name == identifier:
-                return i, m
-        # 忽略大小写的匹配
-        for i, m in enumerate(marks):
-            if m.name.lower() == str(identifier).lower():
-                return i, m
-        return None, None
-
-
-    def advance_mark(identifier, delta: int) -> str:
-        """推进或回退某个命刻，identifier 可为序号或名称，delta 可为正/负整数。返回该命刻进度条字符串或错误信息。"""
-        try:
-            delta = int(delta)
-        except Exception:
-            return get_output("fu.mark.advance.invalid_delta", delta=delta)
-        idx, m = _find_mark(identifier)
-        if m is None:
-            return get_output("fu.mark.advance.not_found", identifier=identifier)
-        m.progress += delta
-        if m.progress < 0:
-            m.progress = 0
-        if m.progress > m.length:
-            m.progress = m.length
+def show_marks() -> str:
+    """显示当前所有命刻的状态。"""
+    if not marks:
+        return get_output("fu.mark.show.empty")
+    lines = []
+    for idx, m in enumerate(marks, start=1):
         status = "(已完成)" if m.is_completed() else f"({m.progress}/{m.length})"
-        return get_output("fu.mark.advance.updated", name=m.name, bar=_render_progress_bar(m), status=status)
+        lines.append(f"{idx}. {m.name}\n{_render_progress_bar(m)} {status}")
+    return get_output("fu.mark.show.list", text="\n\n".join(lines))
 
 
-    def delete_mark(identifier) -> str:
-        """删除指定命刻，identifier 可为序号、名称或特殊字符串 '已完成'（删除所有已完成的命刻）。"""
-        if identifier == "已完成":
-            before = len(marks)
-            remaining = [m for m in marks if not m.is_completed()]
-            removed = before - len(remaining)
-            marks.clear()
-            marks.extend(remaining)
-            return get_output("fu.mark.delete.removed_completed", count=removed)
-        idx, m = _find_mark(identifier)
-        if m is None:
-            return get_output("fu.mark.delete.not_found", identifier=identifier)
-        # 删除
-        del marks[idx]
-        return get_output("fu.mark.delete.removed", name=m.name)
+def _find_mark(identifier):
+    """根据序号（1-based）或名称查找命刻，返回 (index, mark) 或 (None, None)。"""
+    if identifier is None:
+        return None, None
+    # 尝试按序号
+    try:
+        i = int(identifier)
+        if 1 <= i <= len(marks):
+            return i - 1, marks[i - 1]
+    except Exception:
+        pass
+    # 按名称匹配（精确匹配）
+    for i, m in enumerate(marks):
+        if m.name == identifier:
+            return i, m
+    # 忽略大小写的匹配
+    for i, m in enumerate(marks):
+        if m.name.lower() == str(identifier).lower():
+            return i, m
+    return None, None
+
+
+def advance_mark(identifier, delta: int) -> str:
+    """推进或回退某个命刻，identifier 可为序号或名称，delta 可为正/负整数。返回该命刻进度条字符串或错误信息。"""
+    try:
+        delta = int(delta)
+    except Exception:
+        return get_output("fu.mark.advance.invalid_delta", delta=delta)
+    idx, m = _find_mark(identifier)
+    if m is None:
+        return get_output("fu.mark.advance.not_found", identifier=identifier)
+    m.progress += delta
+    if m.progress < 0:
+        m.progress = 0
+    if m.progress > m.length:
+        m.progress = m.length
+    status = "(已完成)" if m.is_completed() else f"({m.progress}/{m.length})"
+    return get_output("fu.mark.advance.updated", name=m.name, bar=_render_progress_bar(m), status=status)
+
+
+def delete_mark(identifier) -> str:
+    """删除指定命刻，identifier 可为序号、名称或特殊字符串 '已完成'（删除所有已完成的命刻）。"""
+    if identifier == "已完成":
+        before = len(marks)
+        remaining = [m for m in marks if not m.is_completed()]
+        removed = before - len(remaining)
+        marks.clear()
+        marks.extend(remaining)
+        return get_output("fu.mark.delete.removed_completed", count=removed)
+    idx, m = _find_mark(identifier)
+    if m is None:
+        return get_output("fu.mark.delete.not_found", identifier=identifier)
+    # 删除
+    del marks[idx]
+    return get_output("fu.mark.delete.removed", name=m.name)
 
