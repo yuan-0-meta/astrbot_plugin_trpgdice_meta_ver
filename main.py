@@ -851,7 +851,7 @@ class DicePlugin(Star):
     async def fu_check_command(self, event: AstrMessageEvent, name: str = "", length: str = ""):
         """创建命刻：.fu mark create 名称 长度"""
         group_id = event.get_group_id()
-        text = fu_mod.create_mark(p1, p2)
+        text = fu_mod.create_mark(name, length)
         await self.save_log(group_id=group_id, content=text)
         yield event.plain_result(text)
 
