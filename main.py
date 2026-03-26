@@ -848,7 +848,7 @@ class DicePlugin(Star):
 
         # 创建
     @mark.command("create", aliases=["add", "new"])
-    async def fu_check_command(self, event: AstrMessageEvent, name: str = "", length: str = ""):
+    async def fu_create_command(self, event: AstrMessageEvent, name: str = "", length: str = ""):
         """创建命刻：.fu mark create 名称 长度"""
         group_id = event.get_group_id()
         text = fu_mod.create_mark(name, length)
@@ -859,6 +859,7 @@ class DicePlugin(Star):
     @mark.command("show", aliases=["list"])
     async def fu_show_command(self, event: AstrMessageEvent):
         """显示命刻：.fu mark show"""
+        group_id = event.get_group_id()
         text = fu_mod.show_marks()
         await self.save_log(group_id=group_id, content=text)
         yield event.plain_result(text)
@@ -873,12 +874,10 @@ class DicePlugin(Star):
         yield event.plain_result(text)
 
         # 删除
-    @mark.command("delete", aliases=["del", "remove", "rm", "删除"])
+    @mark.command("delete", aliases=["del", "remove", "rm"])
     async def fu_delete_command(self, event: AstrMessageEvent, target: str = ""):
         """删除命刻：.fu mark delete 序号或名称；或 .fu mark delete 已完成"""
         group_id = event.get_group_id()
-        text = fu_mod.delete_mark(target)
-        target = p1
         text = fu_mod.delete_mark(target)
         await self.save_log(group_id=group_id, content=text)
         yield event.plain_result(text)
