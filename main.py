@@ -834,8 +834,8 @@ class DicePlugin(Star):
         await self.save_log(group_id=event.get_group_id(), content=result_text)
         yield event.plain_result(result_text)
 
-    @fu.command("mark")
-    async def fu_mark_command(self, event: AstrMessageEvent, action: str = None, arg1: str = None, arg2: str = None):
+    @fu.group("mark")
+    async def fu_mark_command(self, event: AstrMessageEvent):
         """命刻管理：.fu mark <create/show/advance/delete> ...
         示例：
         .fu mark create 名称 长度
@@ -852,41 +852,39 @@ class DicePlugin(Star):
         p2 = (arg2 or "").strip()
 
         # 创建
-        if a.lower() in ("create", "add", "new"):
-            if not p1 or not p2:
-                text = "用法：.fu mark create 名称 长度"
-            else:
-                text = fu_mod.create_mark(p1, p2)
+    @mark.command("create", aliases=["add", "new"])
+    async def fu_check_command(self, event: AstrMessageEvent, name: str = "", length: str = ""):
+        """创建命刻：.fu mark create 名称 长度"""
+        group_id = event.get_group_id()
+        text = fu_mod.create_mark(p1, p2)
+        await self.save_log(group_id=group_id, content=text)
+        yield event.plain_result(text)
 
         # 显示
-        elif a.lower() in ("show", "list"):
-            text = fu_mod.show_marks()
+    @mark.command("show", aliases=["list"])
+    async def fu_show_command(self, event: AstrMessageEvent):
+        """显示命刻：.fu mark show"""
+        text = fu_mod.show_marks()
+        await self.save_log(group_id=group_id, content=text)
+        yield event.plain_result(text)
 
         # 推进/回退
-        elif a.lower() in ("advance", "adv", "push", "inc", "推进", "进"):
-            if not p1 or not p2:
-                text = "用法：.fu mark advance 序号或名称 推进值(可负)"
-            else:
-                text = fu_mod.advance_mark(p1, p2)
+    @mark.command("advance", aliases=["adv", "push", "inc"])
+    async def fu_advance_command(self, event: AstrMessageEvent, identifier: str = "", value: str = ""):
+        """推进命刻：.fu mark advance 序号或名称 推进值(可负)"""
+        group_id = event.get_group_id()
+        text = fu_mod.advance_mark(identifier, value)
+        await self.save_log(group_id=group_id, content=text)
+        yield event.plain_result(text)
 
         # 删除
-        elif a.lower() in ("delete", "del", "remove", "rm", "删除"):
-            if not p1:
-                text = "用法：.fu mark delete 序号或名称；或 .fu mark delete 已完成"
-            else:
-                # 支持中文参数“已完成”直接传递
-                target = p1
-                text = fu_mod.delete_mark(target)
-
-        else:
-            text = (
-                "命刻指令：\n"
-                ".fu mark create 名称 长度 - 新增命刻\n"
-                ".fu mark show - 显示所有命刻\n"
-                ".fu mark advance 序号|名称 数值 - 推进或回退命刻\n"
-                ".fu mark delete 序号|名称 - 删除命刻；.fu mark delete 已完成 - 删除所有已完成命刻"
-            )
-
+    @mark.command("delete", aliases=["del", "remove", "rm", "删除"])
+    async def fu_delete_command(self, event: AstrMessageEvent, target: str = ""):
+        """删除命刻：.fu mark delete 序号或名称；或 .fu mark delete 已完成"""
+        group_id = event.get_group_id()
+        text = fu_mod.delete_mark(target)
+        target = p1
+        text = fu_mod.delete_mark(target)
         await self.save_log(group_id=group_id, content=text)
         yield event.plain_result(text)
         
@@ -1024,7 +1022,13 @@ class DicePlugin(Star):
 
             "fu相关\n"
             "fu check 属性1 属性2 难度 - 进行 FU 检定，属性可以是属性名（会从当前人物卡读取）或直接填数值（表示该属性的数值/骰面）\n\n"
-            
+            "命刻指令：\n"
+                ".fu mark create 名称 长度 - 新增命刻\n"
+                ".fu mark show - 显示所有命刻\n"
+                ".fu mark advance 序号|名称 数值 - 推进或回退命刻\n"
+                ".fu mark delete 序号|名称 - 删除命刻\n"
+                ".fu mark delete 已完成 - 删除所有已完成命刻\n\n"
+
             "娱乐指令\n"
             "jrrp - 掷人品骰，返回0-100的随机数，并给出人品评价\n\n"
 
