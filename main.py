@@ -835,7 +835,7 @@ class DicePlugin(Star):
         yield event.plain_result(result_text)
 
     @fu.group("mark")
-    async def fu_mark_command(self, event: AstrMessageEvent):
+    async def mark(self, event: AstrMessageEvent):
         """命刻管理：.fu mark <create/show/advance/delete> ...
         示例：
         .fu mark create 名称 长度
@@ -844,12 +844,7 @@ class DicePlugin(Star):
         .fu mark delete 1
         .fu mark delete 已完成
         """
-        group_id = event.get_group_id()
-        user_id = event.get_sender_id()
-        # 规范化参数
-        a = (action or "").strip()
-        p1 = (arg1 or "").strip()
-        p2 = (arg2 or "").strip()
+        pass
 
         # 创建
     @mark.command("create", aliases=["add", "new"])
