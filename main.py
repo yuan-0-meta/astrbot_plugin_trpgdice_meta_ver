@@ -836,14 +836,7 @@ class DicePlugin(Star):
 
     @fu.group("mark")
     async def mark(self, event: AstrMessageEvent):
-        """命刻管理：.fu mark <create/show/advance/delete> ...
-        示例：
-        .fu mark create 名称 长度
-        .fu mark show
-        .fu mark advance 1 2
-        .fu mark delete 1
-        .fu mark delete 已完成
-        """
+        """命刻管理：.fu mark <create/show/advance/delete> ..."""
         pass
 
         # 创建
@@ -885,7 +878,7 @@ class DicePlugin(Star):
     # ======================== LOG相关 ============================= #
     @filter.command_group("log")
     async def log(event: AstrMessageEvent):
-        """"日志管理相关指令"""
+        """日志管理相关指令"""
         pass
 
 
@@ -1119,19 +1112,19 @@ class DicePlugin(Star):
             expr = compact[2:].strip()  # expr 从 pc 后的文本开始
             if expr[0:6] == "create":
                 sub_cmd = "create"
-                expr = compact[len(cmd):].strip()
+                expr = compact[len(sub_cmd):].strip()
             elif expr[0:4] == "show":
                 sub_cmd = "show"
-                expr = compact[len(cmd):].strip()
+                expr = compact[len(sub_cmd):].strip()
             elif expr[0:4] == "list":
                 sub_cmd = "list"
                 expr = None  # pc list 没有额外参数，expr 设为 None
             elif expr[0:6] == "change":
                 sub_cmd = "change"
-                expr = compact[len(cmd):].strip()
+                expr = compact[len(sub_cmd):].strip()
             elif expr[0:6] == "update":
                 sub_cmd = "update"
-                expr = compact[len(cmd):].strip()
+                expr = compact[len(sub_cmd):].strip()
                 attr_value_match = re.search(r'([0-9]*)$', expr)  # 尝试提取属性值（如果提供了纯数字作为属性值）
                 if attr_value_match:
                     attr_value = attr_value_match.group(1)
@@ -1141,7 +1134,7 @@ class DicePlugin(Star):
                     attr_name = expr  # 属性名是整个 expr
             elif expr[0:6] == "delete":
                 sub_cmd = "delete"
-                expr = compact[len(cmd):].strip()
+                expr = compact[len(sub_cmd):].strip()
         
         if cmd[0:3] == "coc":
             # 提取"coc"后的子串，识别子命令（如 x）
@@ -1175,28 +1168,25 @@ class DicePlugin(Star):
 
         if cmd[0:6] == "fumark":
             # 提取"mark"后的子串（如 "fu mark create 名称 长度"）
-            mark_pos = raw.find("mark") + len("mark")
-            expr = compact[mark_pos:].strip()  # expr 从 fu 后的文本开始，后续子命令会在 fu mark 的基础上进一步处理
+            expr = compact[6:].strip()  # expr 从 fu 后的文本开始，后续子命令会在 fu mark 的基础上进一步处理
             if expr[0:6] == "create" or expr[0:3] == "add" or expr[0:3] == "new":
                 sub_cmd = "create"
-                create_pos = raw.find("create") + len("create") if "create" in raw else (raw.find("add") + len("add") if "add" in raw else raw.find("new") + len("new"))
-                params = raw[create_pos:].strip().split(" ", 2)[1:]  # expr 从 create 后的文本开始，分割为名称和长度两部分
-                name = params[0] if len(params) > 0 else ""
-                length = params[1] if len(params) > 1 else ""
+                params = raw.strip().split()  # 从原始字符串中分割参数，保留空格以正确识别名称等参数
+                name = params[1] if len(params) > 1 else ""
+                length = params[2] if len(params) > 2 else ""
             if expr[0:4] == "show" or expr[0:4] == "list":
                 sub_cmd = "show"
-                show_pos = raw.find("show") + len("show") if "show" in raw else raw.find("list") + len("list")
-                name = compact[show_pos:].strip()
+                params = raw.strip().split()  # 从原始字符串中分割参数，保留空格以正确识别名称等参数
+                name = params[1] if len(params) > 1 else ""
             if expr[0:7] == "advance" or expr[0:3] == "adv" or expr[0:4] == "push" or expr[0:3] == "inc":
                 sub_cmd = "advance"
-                advance_pos = raw.find("advance") + len("advance") if "advance" in raw else (raw.find("adv") + len("adv") if "adv" in raw else (raw.find("push") + len("push") if "push" in raw else raw.find("inc") + len("inc")))
-                params = raw[advance_pos:].strip().split(" ", 1)  # expr 从 advance 后的文本开始，分割为标识符和数值两部分
-                identifier = params[0] if len(params) > 0 else ""
-                value = params[1] if len(params) > 1 else ""
+                params = raw.strip().split()  # expr 从 advance 后的文本开始，分割为标识符和数值两部分
+                identifier = params[1] if len(params) > 1 else ""
+                value = params[2] if len(params) > 2 else ""
             if expr[0:6] == "delete" or expr[0:3] == "del" or expr[0:6] == "remove" or expr[0:2] == "rm":
                 sub_cmd = "delete"
-                delete_pos = raw.find("delete") + len("delete") if "delete" in raw else (raw.find("del") + len("del") if "del" in raw else (raw.find("remove") + len("remove") if "remove" in raw else raw.find("rm") + len("rm")))
-                target = compact[delete_pos:].strip()
+                params = raw.strip().split()
+                target = params[1] if len(params) > 1 else ""
             cmd = "fu mark"
 
         if cmd[0:2] == "st":
@@ -1354,11 +1344,11 @@ class DicePlugin(Star):
             async for result in self.fu_check_command(event, attr1, attr2, difficulty):
                 yield result
         elif cmd == "fu mark":
-            if sub_cmd =="create":
+            if sub_cmd == "create":
                 async for result in self.fu_create_command(event, name, length):
                     yield result
             elif sub_cmd == "show":
-                async for result in self.fu_show_command(event):
+                async for result in self.fu_show_command(event, identifier):
                     yield result
             elif sub_cmd == "advance":
                 async for result in self.fu_advance_command(event, identifier, value):
