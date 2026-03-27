@@ -1171,21 +1171,21 @@ class DicePlugin(Star):
             expr = compact[6:].strip()  # expr 从 fu 后的文本开始，后续子命令会在 fu mark 的基础上进一步处理
             if expr[0:6] == "create" or expr[0:3] == "add" or expr[0:3] == "new":
                 sub_cmd = "create"
-                params = raw.strip().split()  # 从原始字符串中分割参数，保留空格以正确识别名称等参数
+                params = raw[6:].strip().split()  # 从原始字符串中分割参数，保留空格以正确识别名称等参数
                 name = params[1] if len(params) > 1 else ""
                 length = params[2] if len(params) > 2 else ""
             if expr[0:4] == "show" or expr[0:4] == "list":
                 sub_cmd = "show"
-                params = raw.strip().split()  # 从原始字符串中分割参数，保留空格以正确识别名称等参数
+                params = raw[6:].strip().split()  # 从原始字符串中分割参数，保留空格以正确识别名称等参数
                 name = params[1] if len(params) > 1 else ""
             if expr[0:7] == "advance" or expr[0:3] == "adv" or expr[0:4] == "push" or expr[0:3] == "inc":
                 sub_cmd = "advance"
-                params = raw.strip().split()  # expr 从 advance 后的文本开始，分割为标识符和数值两部分
+                params = raw[6:].strip().split()  # expr 从 advance 后的文本开始，分割为标识符和数值两部分
                 identifier = params[1] if len(params) > 1 else ""
                 value = params[2] if len(params) > 2 else ""
             if expr[0:6] == "delete" or expr[0:3] == "del" or expr[0:6] == "remove" or expr[0:2] == "rm":
                 sub_cmd = "delete"
-                params = raw.strip().split()
+                params = raw[6:].strip().split()
                 target = params[1] if len(params) > 1 else ""
             cmd = "fu mark"
 
