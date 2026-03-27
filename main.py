@@ -1112,19 +1112,19 @@ class DicePlugin(Star):
             expr = compact[2:].strip()  # expr 从 pc 后的文本开始
             if expr[0:6] == "create":
                 sub_cmd = "create"
-                expr = compact[len(sub_cmd):].strip()
+                expr = compact[len(cmd+sub_cmd):].strip()
             elif expr[0:4] == "show":
                 sub_cmd = "show"
-                expr = compact[len(sub_cmd):].strip()
+                expr = compact[len(cmd+sub_cmd):].strip()
             elif expr[0:4] == "list":
                 sub_cmd = "list"
                 expr = None  # pc list 没有额外参数，expr 设为 None
             elif expr[0:6] == "change":
                 sub_cmd = "change"
-                expr = compact[len(sub_cmd):].strip()
+                expr = compact[len(cmd+sub_cmd):].strip()
             elif expr[0:6] == "update":
                 sub_cmd = "update"
-                expr = compact[len(sub_cmd):].strip()
+                expr = compact[len(cmd+sub_cmd):].strip()
                 attr_value_match = re.search(r'([0-9]*)$', expr)  # 尝试提取属性值（如果提供了纯数字作为属性值）
                 if attr_value_match:
                     attr_value = attr_value_match.group(1)
@@ -1134,7 +1134,7 @@ class DicePlugin(Star):
                     attr_name = expr  # 属性名是整个 expr
             elif expr[0:6] == "delete":
                 sub_cmd = "delete"
-                expr = compact[len(sub_cmd):].strip()
+                expr = compact[len(cmd+sub_cmd):].strip()
         
         if cmd[0:3] == "coc":
             # 提取"coc"后的子串，识别子命令（如 x）
@@ -1163,29 +1163,33 @@ class DicePlugin(Star):
             attr1 = params[0] if len(params) > 0 else ""
             attr2 = params[1] if len(params) > 1 else ""
             difficulty = params[2] if len(params) > 2 else ""
+
+            if difficulty == "":
+                difficulty = "6"  # 设置默认难度
     
             cmd = "fu check"
 
         if cmd[0:6] == "fumark":
             # 提取"mark"后的子串（如 "fu mark create 名称 长度"）
-            expr = compact[6:].strip()  # expr 从 fu 后的文本开始，后续子命令会在 fu mark 的基础上进一步处理
+            mark_pos = raw.find("mark") + len("mark")  # 找到"mark"的结束位置
+            expr = raw[mark_pos:].strip()  # expr 从 mark 后的文本开始
             if expr[0:6] == "create" or expr[0:3] == "add" or expr[0:3] == "new":
                 sub_cmd = "create"
-                params = raw[6:].strip().split()  # 从原始字符串中分割参数，保留空格以正确识别名称等参数
+                params = expr.strip().split()  # 从原始字符串中分割参数，保留空格以正确识别名称等参数
                 name = params[1] if len(params) > 1 else ""
                 length = params[2] if len(params) > 2 else ""
             if expr[0:4] == "show" or expr[0:4] == "list":
                 sub_cmd = "show"
-                params = raw[6:].strip().split()  # 从原始字符串中分割参数，保留空格以正确识别名称等参数
+                params = expr.strip().split()  # 从原始字符串中分割参数，保留空格以正确识别名称等参数
                 name = params[1] if len(params) > 1 else ""
             if expr[0:7] == "advance" or expr[0:3] == "adv" or expr[0:4] == "push" or expr[0:3] == "inc":
                 sub_cmd = "advance"
-                params = raw[6:].strip().split()  # expr 从 advance 后的文本开始，分割为标识符和数值两部分
+                params = expr.strip().split()  # expr 从 advance 后的文本开始，分割为标识符和数值两部分
                 identifier = params[1] if len(params) > 1 else ""
                 value = params[2] if len(params) > 2 else ""
             if expr[0:6] == "delete" or expr[0:3] == "del" or expr[0:6] == "remove" or expr[0:2] == "rm":
                 sub_cmd = "delete"
-                params = raw[6:].strip().split()
+                params = expr.strip().split()
                 target = params[1] if len(params) > 1 else ""
             cmd = "fu mark"
 
