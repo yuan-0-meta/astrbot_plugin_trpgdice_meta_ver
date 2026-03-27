@@ -169,13 +169,15 @@ output:
       show:
         empty: "当前没有正在进行的命刻。"
         list: "{text}"
+        single: "{name}\n{bar} {status}"
+        not_found: "未找到命刻：{identifier}"
       advance:
         updated: "{name}\n{bar} {status}"
         invalid_delta: "推进值必须为整数：{delta}"
         not_found: "未找到命刻：{identifier}"
       delete:
         removed: "已删除命刻：{name}"
-        removed_completed: "已删除 {count} 个已完成的命刻。"
+        removed_multiple: "已删除 {count} 个 “{name}” 的命刻。"
         not_found: "未找到命刻：{identifier}"
 
   # ---------- SAN 理智 ----------

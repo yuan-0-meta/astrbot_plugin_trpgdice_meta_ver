@@ -857,10 +857,10 @@ class DicePlugin(Star):
 
         # 显示
     @mark.command("show", aliases=["list"])
-    async def fu_show_command(self, event: AstrMessageEvent):
+    async def fu_show_command(self, event: AstrMessageEvent, identifier: str = ""):
         """显示命刻：.fu mark show"""
         group_id = event.get_group_id()
-        text = fu_mod.show_marks()
+        text = fu_mod.show_marks(identifier)
         await self.save_log(group_id=group_id, content=text)
         yield event.plain_result(text)
 
@@ -1017,11 +1017,11 @@ class DicePlugin(Star):
             "fu相关\n"
             "fu check 属性1 属性2 难度 - 进行 FU 检定，属性可以是属性名（会从当前人物卡读取）或直接填数值（表示该属性的数值/骰面）\n\n"
             "命刻指令：\n"
-                ".fu mark create 名称 长度 - 新增命刻\n"
-                ".fu mark show - 显示所有命刻\n"
-                ".fu mark advance 序号|名称 数值 - 推进或回退命刻\n"
-                ".fu mark delete 序号|名称 - 删除命刻\n"
-                ".fu mark delete 已完成 - 删除所有已完成命刻\n\n"
+                "fu mark create 名称 长度 - 新增命刻\n"
+                "fu mark show - 显示所有命刻\n"
+                "fu mark advance 序号|名称 数值 - 推进或回退命刻\n"
+                "fu mark delete 序号|名称 - 删除命刻\n"
+                "fu mark delete 已完成 - 删除所有已完成命刻\n\n"
 
             "娱乐指令\n"
             "jrrp - 掷人品骰，返回0-100的随机数，并给出人品评价\n\n"
@@ -1176,12 +1176,27 @@ class DicePlugin(Star):
         if cmd[0:6] == "fumark":
             # 提取"mark"后的子串（如 "fu mark create 名称 长度"）
             mark_pos = raw.find("mark") + len("mark")
-            params = raw[mark_pos:].strip().split()
-
-            action = params[0] if len(params) > 0 else ""
-            arg1 = params[1] if len(params) > 1 else ""
-            arg2 = params[2] if len(params) > 2 else ""
-
+            expr = compact[mark_pos:].strip()  # expr 从 fu 后的文本开始，后续子命令会在 fu mark 的基础上进一步处理
+            if expr[0:6] == "create" or expr[0:3] == "add" or expr[0:3] == "new":
+                sub_cmd = "create"
+                create_pos = raw.find("create") + len("create") if "create" in raw else (raw.find("add") + len("add") if "add" in raw else raw.find("new") + len("new"))
+                params = raw[create_pos:].strip().split(" ", 2)[1:]  # expr 从 create 后的文本开始，分割为名称和长度两部分
+                name = params[0] if len(params) > 0 else ""
+                length = params[1] if len(params) > 1 else ""
+            if expr[0:4] == "show" or expr[0:4] == "list":
+                sub_cmd = "show"
+                show_pos = raw.find("show") + len("show") if "show" in raw else raw.find("list") + len("list")
+                name = compact[show_pos:].strip()
+            if expr[0:7] == "advance" or expr[0:3] == "adv" or expr[0:4] == "push" or expr[0:3] == "inc":
+                sub_cmd = "advance"
+                advance_pos = raw.find("advance") + len("advance") if "advance" in raw else (raw.find("adv") + len("adv") if "adv" in raw else (raw.find("push") + len("push") if "push" in raw else raw.find("inc") + len("inc")))
+                params = raw[advance_pos:].strip().split(" ", 1)  # expr 从 advance 后的文本开始，分割为标识符和数值两部分
+                identifier = params[0] if len(params) > 0 else ""
+                value = params[1] if len(params) > 1 else ""
+            if expr[0:6] == "delete" or expr[0:3] == "del" or expr[0:6] == "remove" or expr[0:2] == "rm":
+                sub_cmd = "delete"
+                delete_pos = raw.find("delete") + len("delete") if "delete" in raw else (raw.find("del") + len("del") if "del" in raw else (raw.find("remove") + len("remove") if "remove" in raw else raw.find("rm") + len("rm")))
+                target = compact[delete_pos:].strip()
             cmd = "fu mark"
 
         if cmd[0:2] == "st":
@@ -1339,8 +1354,18 @@ class DicePlugin(Star):
             async for result in self.fu_check_command(event, attr1, attr2, difficulty):
                 yield result
         elif cmd == "fu mark":
-            async for result in self.fu_mark_command(event, action if 'action' in locals() else None, arg1 if 'arg1' in locals() else None, arg2 if 'arg2' in locals() else None):
-                yield result
+            if sub_cmd =="create":
+                async for result in self.fu_create_command(event, name, length):
+                    yield result
+            elif sub_cmd == "show":
+                async for result in self.fu_show_command(event):
+                    yield result
+            elif sub_cmd == "advance":
+                async for result in self.fu_advance_command(event, identifier, value):
+                    yield result
+            elif sub_cmd == "delete":
+                async for result in self.fu_delete_command(event, target):
+                    yield result
         elif cmd == "jrrp":
             async for result in self.roll_RP_cmd(event):
                 yield result

@@ -186,37 +186,60 @@ def create_mark(name: str, length: int) -> str:
     return get_output("fu.mark.create", name=m.name, bar=_render_progress_bar(m), progress=m.progress, length=m.length)
 
 
-def show_marks() -> str:
+def show_marks(identifier: str = "") -> str:
     """显示当前所有命刻的状态。"""
     if not marks:
         return get_output("fu.mark.show.empty")
     lines = []
+    if identifier:
+        idx, m = _find_mark(identifier)
+        if m is None:
+            return get_output("fu.mark.show.not_found", identifier=identifier)
+        status = "(已完成)" if m.is_completed() else f"({m.progress}/{m.length})"
+        return get_output("fu.mark.show.single", name=m.name, bar=_render_progress_bar(m), status=status)
     for idx, m in enumerate(marks, start=1):
         status = "(已完成)" if m.is_completed() else f"({m.progress}/{m.length})"
         lines.append(f"{idx}. {m.name}\n{_render_progress_bar(m)} {status}")
     return get_output("fu.mark.show.list", text="\n\n".join(lines))
 
 
-def _find_mark(identifier):
+def _find_mark(identifier: str) -> (int, Mark):
     """根据序号（1-based）或名称查找命刻，返回 (index, mark) 或 (None, None)。"""
-    if identifier is None:
+    if identifier == "":
         return None, None
     # 尝试按序号
+    results = []
+    if identifier is None:
+        return results
+    s = str(identifier)
+    # 尝试按序号（优先）
     try:
-        i = int(identifier)
+        i = int(s)
         if 1 <= i <= len(marks):
-            return i - 1, marks[i - 1]
+            return [(i - 1, marks[i - 1])]
     except Exception:
         pass
-    # 按名称匹配（精确匹配）
+
+    # 精确匹配（区分大小写）
     for i, m in enumerate(marks):
-        if m.name == identifier:
-            return i, m
-    # 忽略大小写的匹配
+        if m.name == s:
+            results.append((i, m))
+    if results:
+        return results
+
+    # 精确匹配（不区分大小写）
+    low = s.lower()
     for i, m in enumerate(marks):
-        if m.name.lower() == str(identifier).lower():
-            return i, m
-    return None, None
+        if m.name.lower() == low:
+            results.append((i, m))
+    if results:
+        return results
+
+    # 模糊包含匹配（不区分大小写）——返回所有包含 identifier 的命刻
+    for i, m in enumerate(marks):
+        if low in m.name.lower():
+            results.append((i, m))
+    return results
 
 
 def advance_mark(identifier, delta: int) -> str:
@@ -225,16 +248,22 @@ def advance_mark(identifier, delta: int) -> str:
         delta = int(delta)
     except Exception:
         return get_output("fu.mark.advance.invalid_delta", delta=delta)
-    idx, m = _find_mark(identifier)
-    if m is None:
+    matches = _find_mark(identifier)
+    if not matches:
         return get_output("fu.mark.advance.not_found", identifier=identifier)
-    m.progress += delta
-    if m.progress < 0:
-        m.progress = 0
-    if m.progress > m.length:
-        m.progress = m.length
-    status = "(已完成)" if m.is_completed() else f"({m.progress}/{m.length})"
-    return get_output("fu.mark.advance.updated", name=m.name, bar=_render_progress_bar(m), status=status)
+
+    texts = []
+    for identifier, m in matches:
+        m.progress += delta
+        if m.progress < 0:
+            m.progress = 0
+        if m.progress > m.length:
+            m.progress = m.length
+        status = "(已完成)" if m.is_completed() else f"({m.progress}/{m.length})"
+        texts.append(get_output("fu.mark.advance.updated", name=m.name, bar=_render_progress_bar(m), status=status))
+
+    # 如果只有一项匹配，则返回单条模板；否则将多条结果用空行分隔返回
+    return "\n\n".join(texts)
 
 
 def delete_mark(identifier) -> str:
@@ -246,10 +275,21 @@ def delete_mark(identifier) -> str:
         marks.clear()
         marks.extend(remaining)
         return get_output("fu.mark.delete.removed_completed", count=removed)
-    idx, m = _find_mark(identifier)
-    if m is None:
+    matches = _find_mark(identifier)
+    if not matches:
         return get_output("fu.mark.delete.not_found", identifier=identifier)
-    # 删除
-    del marks[idx]
-    return get_output("fu.mark.delete.removed", name=m.name)
+
+    # 删除所有匹配的项（使用索引集合防止删除时错位）
+    remove_idxs = set(i for i, _ in matches)
+    removed_names = [m.name for _, m in matches]
+    remaining = [m for i, m in enumerate(marks) if i not in remove_idxs]
+    removed_count = len(marks) - len(remaining)
+    marks.clear()
+    marks.extend(remaining)
+
+    if removed_count == 1:
+        return get_output("fu.mark.delete.removed", name=removed_names[0])
+    else:
+        # 若删除多项，使用已完成删除模板表示数量
+        return get_output("fu.mark.delete.removed_multiple", count=removed_count)
 
