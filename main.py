@@ -1112,19 +1112,19 @@ class DicePlugin(Star):
             expr = compact[2:].strip()  # expr 从 pc 后的文本开始
             if expr[0:6] == "create":
                 sub_cmd = "create"
-                expr = compact[len(cmd+sub_cmd):].strip()
+                expr = expr[len(sub_cmd):].strip()
             elif expr[0:4] == "show":
                 sub_cmd = "show"
-                expr = compact[len(cmd+sub_cmd):].strip()
+                expr = expr[len(sub_cmd):].strip()
             elif expr[0:4] == "list":
                 sub_cmd = "list"
                 expr = None  # pc list 没有额外参数，expr 设为 None
             elif expr[0:6] == "change":
                 sub_cmd = "change"
-                expr = compact[len(cmd+sub_cmd):].strip()
+                expr = expr[len(sub_cmd):].strip()
             elif expr[0:6] == "update":
                 sub_cmd = "update"
-                expr = compact[len(cmd+sub_cmd):].strip()
+                expr = expr[len(sub_cmd):].strip()
                 attr_value_match = re.search(r'([0-9]*)$', expr)  # 尝试提取属性值（如果提供了纯数字作为属性值）
                 if attr_value_match:
                     attr_value = attr_value_match.group(1)
@@ -1134,7 +1134,7 @@ class DicePlugin(Star):
                     attr_name = expr  # 属性名是整个 expr
             elif expr[0:6] == "delete":
                 sub_cmd = "delete"
-                expr = compact[len(cmd+sub_cmd):].strip()
+                expr = expr[len(sub_cmd):].strip()
         
         if cmd[0:3] == "coc":
             # 提取"coc"后的子串，识别子命令（如 x）
@@ -1162,10 +1162,7 @@ class DicePlugin(Star):
             # 按顺序赋值（需确保参数数量足够，可添加异常处理）
             attr1 = params[0] if len(params) > 0 else ""
             attr2 = params[1] if len(params) > 1 else ""
-            difficulty = params[2] if len(params) > 2 else ""
-
-            if difficulty == "":
-                difficulty = "6"  # 设置默认难度
+            difficulty = params[2] if len(params) > 2 else None
     
             cmd = "fu check"
 
@@ -1181,7 +1178,7 @@ class DicePlugin(Star):
             if expr[0:4] == "show" or expr[0:4] == "list":
                 sub_cmd = "show"
                 params = expr.strip().split()  # 从原始字符串中分割参数，保留空格以正确识别名称等参数
-                name = params[1] if len(params) > 1 else ""
+                identifier = params[1] if len(params) > 1 else None
             if expr[0:7] == "advance" or expr[0:3] == "adv" or expr[0:4] == "push" or expr[0:3] == "inc":
                 sub_cmd = "advance"
                 params = expr.strip().split()  # expr 从 advance 后的文本开始，分割为标识符和数值两部分

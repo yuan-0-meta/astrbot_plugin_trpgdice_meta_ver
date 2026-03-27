@@ -143,11 +143,11 @@ output:
       success: "{name} 的结果：\n {result}"
       error: "吸血鬼掷骰错误：\n {error}"
     hidden:
-      success: 
+      success:
         - "隐藏掷骰结果: {result} \n-只有你能看到这个结果哦。"
         - "隐藏掷骰结果: {result} \n-嘘……这可是我们之间的秘密。"
       error: "隐藏掷骰错误：\n {error}"
-      group: 
+      group:
         - "已进行隐藏掷骰！"
         - "隐藏掷骰已完成！"
     detail: "掷骰详情：\n {detail}"
@@ -167,7 +167,7 @@ output:
     mark:
       create: "已创建命刻：{name}\n{bar} ({progress}/{length})"
       show:
-        empty: "当前没有正在进行的命刻。"
+        empty: "当前没有正在进行的命刻！"
         list: "{text}"
         single: "{name}\n{bar} {status}"
         not_found: "未找到命刻：{identifier}"
