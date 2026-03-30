@@ -61,11 +61,11 @@ def fu_check(attr1: str, attr2: str, difficulty: int, user_id: str = None, name:
     total = hope_dice + fear_dice
 
     if hope_dice > fear_dice:
-        high_die = hope_dice
-        low_die = fear_dice
+        high_dice = hope_dice
+        low_dice = fear_dice
     else:
-        high_die = fear_dice
-        low_die = hope_dice
+        high_dice = fear_dice
+        low_dice = hope_dice
 
     # 大失败（两个1）
     if hope_dice == 1 and fear_dice == 1:
@@ -118,8 +118,8 @@ def fu_check(attr1: str, attr2: str, difficulty: int, user_id: str = None, name:
                 fear=fear_max,
                 total=total,
                 difficulty=difficulty,
-                high_die=high_die,
-                low_die=low_die,
+                high_dice=high_dice,
+                low_dice=low_dice,
             )
         else:
             return get_output(
@@ -135,8 +135,8 @@ def fu_check(attr1: str, attr2: str, difficulty: int, user_id: str = None, name:
                 fear=fear_max,
                 total=total,
                 difficulty=difficulty,
-                high_die=high_die,
-                low_die=low_die,
+                high_dice=high_dice,
+                low_dice=low_dice,
             )
     else:
         # fear is fear_dice (hope_dice < fear_dice)
@@ -154,8 +154,8 @@ def fu_check(attr1: str, attr2: str, difficulty: int, user_id: str = None, name:
                 fear=fear_max,
                 total=total,
                 difficulty=difficulty,
-                high_die=high_die,
-                low_die=low_die,
+                high_die=high_dice,
+                low_die=low_dice,
 
             )
         else:
@@ -172,8 +172,8 @@ def fu_check(attr1: str, attr2: str, difficulty: int, user_id: str = None, name:
                 fear=fear_max,
                 total=total,
                 difficulty=difficulty,
-                high_die=high_die,
-                low_die=low_die,
+                high_dice=high_dice,
+                low_dice=low_dice,
             )
     # ----------------- 命刻系统 -----------------
     # 提供：新增命刻、显示命刻、推进/回退命刻、删除命刻
