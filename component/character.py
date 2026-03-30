@@ -8,13 +8,27 @@ from .output import get_output
 PLUGIN_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FOLDER = os.path.join(PLUGIN_DIR, "..", "chara_data")
 
+# 当前活动群组（由 main 在每条消息处理中设置），默认 None 表示全局/兼容旧行为
+_active_group = None
+
+
+def set_active_group(group_id):
+    global _active_group
+    _active_group = group_id
+
+
 def get_user_folder(user_id: str):
     """
     获取用户的人物卡存储文件夹路径，不存在则自动创建。
+    当_module_设置了活动群组时，路径为 DATA_FOLDER/<group_id>/<user_id>，否则为 DATA_FOLDER/<user_id>（兼容以前行为）。
     """
-    folder = os.path.join(DATA_FOLDER, str(user_id))
+    if _active_group is not None:
+        folder = os.path.join(DATA_FOLDER, str(_active_group), str(user_id))
+    else:
+        folder = os.path.join(DATA_FOLDER, str(user_id))
     os.makedirs(folder, exist_ok=True)
     return folder
+
 
 def get_all_characters(user_id: str):
     """
@@ -22,6 +36,8 @@ def get_all_characters(user_id: str):
     """
     folder = get_user_folder(user_id)
     characters = {}
+    if not os.path.exists(folder):
+        return characters
     for filename in os.listdir(folder):
         if filename.endswith(".json"):
             path = os.path.join(folder, filename)
@@ -30,17 +46,20 @@ def get_all_characters(user_id: str):
                 characters[data["name"]] = data["id"]
     return characters
 
+
 def get_character_file(user_id: str, chara_id: str):
     """
     获取指定人物卡的文件路径。
     """
     return os.path.join(get_user_folder(user_id), f"{chara_id}.json")
 
+
 def get_current_character_file(user_id: str):
     """
     获取当前选中人物卡的记录文件路径。
     """
     return os.path.join(get_user_folder(user_id), "current.txt")
+
 
 def get_current_character_id(user_id: str):
     """
@@ -52,6 +71,7 @@ def get_current_character_id(user_id: str):
             return f.read().strip()
     return None
 
+
 def get_current_character(user_id: str):
     """
     获取当前选中的人物卡数据（字典），没有则返回None。
@@ -61,12 +81,14 @@ def get_current_character(user_id: str):
         return None
     return load_character(user_id, chara_id)
 
+
 def set_current_character(user_id: str, chara_id: str):
     """
     设置当前选中的人物卡ID，写入current.txt。
     """
     with open(get_current_character_file(user_id), "w", encoding="utf-8") as f:
         f.write(chara_id if chara_id is not None else "")
+
 
 def load_character(user_id: str, chara_id: str):
     """
@@ -77,6 +99,7 @@ def load_character(user_id: str, chara_id: str):
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
     return None
+
 
 def save_character(user_id: str, chara_id: str, data: dict):
     """
@@ -206,6 +229,7 @@ def create_character(user_id: str, name: str, attributes: dict):
     set_current_character(user_id, chara_id)
     return chara_id
 
+
 def delete_character(user_id: str, name: str):
     """
     删除指定名字的人物卡。
@@ -226,6 +250,7 @@ def delete_character(user_id: str, name: str):
         set_current_character(user_id, None)
     return True, chara_to_delete_id
 
+
 def set_nickname(user_id: str, chara_id: str, nickname: str):
     """
     为指定人物卡设置昵称。
@@ -235,8 +260,8 @@ def set_nickname(user_id: str, chara_id: str, nickname: str):
         chara["nickname"] = nickname
         save_character(user_id, chara_id, chara)
         return True
-    
-    
+
+
 def grow_up(user_id: str, skill_name: str, skill_value: int = None):
     """
     技能成长判定（COC规则）

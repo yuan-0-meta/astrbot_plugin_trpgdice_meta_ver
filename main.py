@@ -176,6 +176,10 @@ class DicePlugin(Star):
             return
 
         user_id = event.get_sender_id()
+        # 确保使用当前群组的角色数据目录
+        group_id = event.get_group_id()
+        charmod.set_active_group(group_id)
+        fu_mod.set_active_group(group_id)
         chara_id = charmod.get_current_character_id(user_id)
         if not chara_id:
             yield get_output("pc.show.no_active")
@@ -254,6 +258,10 @@ class DicePlugin(Star):
         """创建pc人物卡"""
         user_id = event.get_sender_id()
         user_name = event.get_sender_name()
+        group_id = event.get_group_id()
+        # 设置模块级活动群，确保人物卡/命刻按群隔离存储
+        charmod.set_active_group(group_id)
+        fu_mod.set_active_group(group_id)
         characters = charmod.get_all_characters(user_id)
 
         if not name:
@@ -296,6 +304,9 @@ class DicePlugin(Star):
     async def pc_show_character(self, event, attribute_name: Optional[str] = None):
         """展示当前人物卡的属性，或展示特定属性值"""
         user_id = event.get_sender_id()
+        group_id = event.get_group_id()
+        charmod.set_active_group(group_id)
+        fu_mod.set_active_group(group_id)
         chara_id = charmod.get_current_character_id(user_id)
 
         if not chara_id:
@@ -323,6 +334,9 @@ class DicePlugin(Star):
     async def pc_list_characters(self, event):
         """列出用户所有的人物卡，标明当前使用的人物卡"""
         user_id = event.get_sender_id()
+        group_id = event.get_group_id()
+        charmod.set_active_group(group_id)
+        fu_mod.set_active_group(group_id)
         characters = charmod.get_all_characters(user_id)
         if not characters:
             yield event.plain_result(get_output("pc.list.empty"))
@@ -338,6 +352,9 @@ class DicePlugin(Star):
     async def pc_change_character(self, event, name: str):
         """切换当前使用的人物卡"""
         user_id = event.get_sender_id()
+        group_id = event.get_group_id()
+        charmod.set_active_group(group_id)
+        fu_mod.set_active_group(group_id)
         characters = charmod.get_all_characters(user_id)
         if name not in characters:
             yield event.plain_result(get_output("pc.change,missing", name=name))
@@ -352,6 +369,9 @@ class DicePlugin(Star):
     async def pc_update_character(self, event, attribute: str, value: str):
         """更新当前人物卡的属性值，支持直接赋值或使用 + - * 运算符进行修改，value 支持掷骰表达式（如 2d6）"""
         user_id = event.get_sender_id()
+        group_id = event.get_group_id()
+        charmod.set_active_group(group_id)
+        fu_mod.set_active_group(group_id)
         chara_id = charmod.get_current_character_id(user_id)
         if not chara_id:
             yield event.plain_result(get_output("pc.update.no_active"))
@@ -403,6 +423,9 @@ class DicePlugin(Star):
     async def pc_delete_character(self, event, name: str):
         """删除指定的人物卡"""
         user_id = event.get_sender_id()
+        group_id = event.get_group_id()
+        charmod.set_active_group(group_id)
+        fu_mod.set_active_group(group_id)
         success, _ = charmod.delete_character(user_id, name)
         if not success:
             yield event.plain_result(get_output("pc.delete.fail", name=name))
@@ -422,6 +445,10 @@ class DicePlugin(Star):
         client = event.bot
         user_id = event.get_sender_id()
         group_id = event.get_group_id()
+
+        # 设置模块级活动群，确保按群隔离
+        charmod.set_active_group(group_id)
+        fu_mod.set_active_group(group_id)
 
         chara_id = charmod.get_current_character_id(user_id)
         chara_data = charmod.load_character(user_id, chara_id)
@@ -450,6 +477,10 @@ class DicePlugin(Star):
         group_id = event.get_group_id()
         name = event.get_sender_name()
 
+        # 设置模块级活动群，确保按群隔离
+        charmod.set_active_group(group_id)
+        fu_mod.set_active_group(group_id)
+
         if skill_value is None:
             skill_value = charmod.get_skill_value(user_id, skill_name)
 
@@ -472,6 +503,10 @@ class DicePlugin(Star):
         user_id = event.get_sender_id()
         group_id = event.get_group_id()
 
+        # 设置模块级活动群，确保按群隔离
+        charmod.set_active_group(group_id)
+        fu_mod.set_active_group(group_id)
+
         if skill_value is None:
             skill_value = charmod.get_skill_value(user_id, skill_name)
 
@@ -489,6 +524,10 @@ class DicePlugin(Star):
         """奖励骰技能判定"""
         user_id = event.get_sender_id()
         group_id = event.get_group_id()
+
+        # 设置模块级活动群，确保按群隔离
+        charmod.set_active_group(group_id)
+        fu_mod.set_active_group(group_id)
 
         if skill_value is None:
             skill_value = charmod.get_skill_value(user_id, skill_name)
@@ -526,6 +565,10 @@ class DicePlugin(Star):
         调用 character 模块的 grow_up 生成结果文本，再通过 event 发送给用户。
         """
         user_id = event.get_sender_id()
+        group_id = event.get_group_id()
+        # 设置模块级活动群，确保按群隔离
+        charmod.set_active_group(group_id)
+        fu_mod.set_active_group(group_id)
 
         # 调用 character.py 中同步逻辑函数，不传入额外函数引用
         result_str = charmod.grow_up(
@@ -575,6 +618,8 @@ class DicePlugin(Star):
         """理智检定"""
         user_id = event.get_sender_id()
         group_id = event.get_group_id()
+        charmod.set_active_group(group_id)
+        fu_mod.set_active_group(group_id)
         chara_data = charmod.get_current_character(user_id)
         client = event.bot
         
@@ -828,6 +873,9 @@ class DicePlugin(Star):
         ret = await get_sender_nickname(client, group_id, user_id)
         ret = event.get_sender_name() if ret == "" else ret
 
+        # 设置活动群以确保从正确群的人物卡读取属性
+        fu_mod.set_active_group(group_id)
+        charmod.set_active_group(group_id)
         # 调用 fu 模块进行检定（传入 user_id 以便从人物卡读取属性值）
         result_text = fu_mod.fu_check(attr1=attr1, attr2=attr2, difficulty=difficulty, user_id=user_id, name=ret)
 
@@ -844,6 +892,9 @@ class DicePlugin(Star):
     async def fu_create_command(self, event: AstrMessageEvent, name: str = "", length: str = ""):
         """创建命刻：.fu mark create 名称 长度"""
         group_id = event.get_group_id()
+        # 设置模块级活动群，确保命刻按群隔离
+        fu_mod.set_active_group(group_id)
+        charmod.set_active_group(group_id)
         text = fu_mod.create_mark(name, length)
         await self.save_log(group_id=group_id, content=text)
         yield event.plain_result(text)
@@ -853,6 +904,8 @@ class DicePlugin(Star):
     async def fu_show_command(self, event: AstrMessageEvent, identifier: str = ""):
         """显示命刻：.fu mark show"""
         group_id = event.get_group_id()
+        fu_mod.set_active_group(group_id)
+        charmod.set_active_group(group_id)
         text = fu_mod.show_marks(identifier)
         await self.save_log(group_id=group_id, content=text)
         yield event.plain_result(text)
@@ -862,6 +915,8 @@ class DicePlugin(Star):
     async def fu_advance_command(self, event: AstrMessageEvent, identifier: str = "", value: str = ""):
         """推进命刻：.fu mark advance 序号或名称 推进值(可负)"""
         group_id = event.get_group_id()
+        fu_mod.set_active_group(group_id)
+        charmod.set_active_group(group_id)
         text = fu_mod.advance_mark(identifier, value)
         await self.save_log(group_id=group_id, content=text)
         yield event.plain_result(text)
@@ -871,6 +926,8 @@ class DicePlugin(Star):
     async def fu_delete_command(self, event: AstrMessageEvent, target: str = ""):
         """删除命刻：.fu mark delete 序号或名称；或 .fu mark delete 已完成"""
         group_id = event.get_group_id()
+        fu_mod.set_active_group(group_id)
+        charmod.set_active_group(group_id)
         text = fu_mod.delete_mark(target)
         await self.save_log(group_id=group_id, content=text)
         yield event.plain_result(text)

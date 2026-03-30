@@ -158,10 +158,10 @@ output:
     check:
       great_success: "{name}：大成功！\n 两枚骰子都为 {hope_dice} 和 {fear_dice}（关键成功）"
       great_failure: "{name}：大失败！\n 两枚骰子都为 {hope_dice} 和 {fear_dice}"
-      hope_success: "{name}：希望成功。\n {attribute1} 和 {attribute2} 投掷结果如下 → \n 希望({hope_attr}=d{hope_max}) → {hope_dice} \n 恐惧({fear_attr}=d{fear_max}) → {fear_dice} \n 高值为 {high_dice}, 低值为 {low_dice} \n 总和 {total} / 难度 {difficulty}"
-      hope_failure: "{name}：希望失败。\n {attribute1} 和 {attribute2} 投掷结果如下 → \n 希望({hope_attr}=d{hope_max}) → {hope_dice} \n 恐惧({fear_attr}=d{fear_max}) → {fear_dice} \n 高值为 {high_dice}, 低值为 {low_dice} \n 总和 {total} / 难度 {difficulty}"
-      fear_success: "{name}：恐惧成功。\n {attribute1} 和 {attribute2} 投掷结果如下 → \n 希望({hope_attr}=d{hope_max}) → {hope_dice} \n 恐惧({fear_attr}=d{fear_max}) → {fear_dice} \n 高值为 {high_dice}, 低值为 {low_dice} \n 总和 {total} / 难度 {difficulty}"
-      fear_failure: "{name}：恐惧失败。\n {attribute1} 和 {attribute2} 投掷结果如下 → \n 希望({hope_attr}=d{hope_max}) → {hope_dice} \n 恐惧({fear_attr}=d{fear_max}) → {fear_dice} \n 高值为 {high_dice}, 低值为 {low_dice} \n 总和 {total} / 难度 {difficulty}"
+      hope_success: "{name}：希望成功。\n {attribute1} 和 {attribute2} 投掷结果如下 → \n 希望({hope_attr}=d{hope}) → {hope_dice} \n 恐惧({fear_attr}=d{fear}) → {fear_dice} \n 高值为 {high_dice}, 低值为 {low_dice} \n 总和 {total} / 难度 {difficulty}"
+      hope_failure: "{name}：希望失败。\n {attribute1} 和 {attribute2} 投掷结果如下 → \n 希望({hope_attr}=d{hope}) → {hope_dice} \n 恐惧({fear_attr}=d{fear}) → {fear_dice} \n 高值为 {high_dice}, 低值为 {low_dice} \n 总和 {total} / 难度 {difficulty}"
+      fear_success: "{name}：恐惧成功。\n {attribute1} 和 {attribute2} 投掷结果如下 → \n 希望({hope_attr}=d{hope}) → {hope_dice} \n 恐惧({fear_attr}=d{fear}) → {fear_dice} \n 高值为 {high_dice}, 低值为 {low_dice} \n 总和 {total} / 难度 {difficulty}"
+      fear_failure: "{name}：恐惧失败。\n {attribute1} 和 {attribute2} 投掷结果如下 → \n 希望({hope_attr}=d{hope}) → {hope_dice} \n 恐惧({fear_attr}=d{fear}) → {fear_dice} \n 高值为 {high_dice}, 低值为 {low_dice} \n 总和 {total} / 难度 {difficulty}"
       tie: "{name}：平局（两骰点数相同）。\n d{attribute1} 和 d{attribute2} 都为 {hope_dice} 和 {fear_dice} → \n 总和 {total} / 难度 {difficulty}"
       error: "FU 检定错误： {error}"
     mark:
