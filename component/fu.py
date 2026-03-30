@@ -6,11 +6,11 @@ from . import character as charmod
 def fu_check(attr1: str, attr2: str, difficulty: int, user_id: str = None, name: str = None):
     """
     最终物语（fu）掷骰检定规则实现：
-    - 掷两枚 d10，较高为希望骰，较低为恐惧骰
+    - 掷两枚骰子，较大为希望骰，较小为恐惧骰
     - 若两枚相同且 >=6 => 大成功（忽视难度）
     - 若两枚都是 1 => 大失败
     - 否则以两枚之和与难度比较（使用 >= 判定为成功），并根据 希望骰>恐惧骰 决定“希望”或“恐惧”的性质
-    返回格式化的输出字符串（通过 get_output 的 `fu.check` 模板）
+    - 返回格式化的输出字符串（通过 get_output 的 `fu.check` 模板）
     """
     try:
         difficulty = int(difficulty)
@@ -31,6 +31,15 @@ def fu_check(attr1: str, attr2: str, difficulty: int, user_id: str = None, name:
                 return 0
         return 0
 
+    """参数解释，不然我自己看不懂了。attr1 和 attr2 可以是直接的数值字符串（如 "8"）或属性名称（如 "力量"），
+        如果是属性名称则会尝试从人物卡中读取对应属性值（如果 user_id 提供且属性存在）。
+        v1,v2 是解析后的属性值，必须为正整数，否则视为无效输入并返回错误信息。
+        根据 v1 和 v2 的大小关系确定哪个是希望属性，哪个是恐惧属性，并进行掷骰和结果判定。
+        hope_attr, hope_max, fear_attr, fear_max 分别记录希望和恐惧的属性名称及其数值上限，用于输出模板中的变量替换。
+        hope_dice 和 fear_dice 是两枚骰子的结果，hope_dice是希望骰，fear_dice是恐惧骰，total 是它们的和，high_die 和 low_die 分别是较大和较小的骰子结果。
+        根据掷骰结果判断是否触发大成功、大失败、平局、希望成功/失败，并返回相应的输出字符串。
+    """
+
     v1 = resolve_attr_value(attr1)
     v2 = resolve_attr_value(attr2)
 
@@ -47,37 +56,44 @@ def fu_check(attr1: str, attr2: str, difficulty: int, user_id: str = None, name:
         hope_roll = random.randint(1, hope_max)
         fear_roll = random.randint(1, fear_max)
 
-    d1 = hope_roll
-    d2 = fear_roll
-    total = d1 + d2
+    hope_dice = hope_roll
+    fear_dice = fear_roll
+    total = hope_dice + fear_dice
+
+    if hope_dice > fear_dice:
+        high_die = hope_dice
+        low_die = fear_dice
+    else:
+        high_die = fear_dice
+        low_die = hope_dice
 
     # 大失败（两个1）
-    if d1 == 1 and d2 == 1:
+    if hope_dice == 1 and fear_dice == 1:
         return get_output(
             "fu.check.great_failure",
             name=name or "",
-            d1=d1,
-            d2=d2,
+            hope_dice=hope_dice,
+            fear_dice=fear_dice,
         )
 
     # 大成功（两个一样且 >=6）
-    if d1 == d2 and d1 >= 6:
+    if hope_dice == fear_dice and hope_dice >= 6:
         return get_output(
             "fu.check.great_success",
             name=name or "",
-            d1=d1,
-            d2=d2,
+            hope_dice=hope_dice,
+            fear_dice=fear_dice,
         )
 
     # 平局（相同点数但未触发大成功）
-    if d1 == d2:
+    if hope_dice == fear_dice:
         return get_output(
             "fu.check.tie",
             name=name or "",
             attribute1=attr1,
             attribute2=attr2,
-            d1=d1,
-            d2=d2,
+            hope_dice=hope_dice,
+            fear_dice=fear_dice,
             total=total,
             difficulty=difficulty,
         )
@@ -86,22 +102,24 @@ def fu_check(attr1: str, attr2: str, difficulty: int, user_id: str = None, name:
     success = total >= difficulty
 
     # 根据掷出点数判断希望/恐惧
-    if d1 > d2:
-        # hope is d1
+    if hope_dice > fear_dice:
+        # hope is hope_dice
         if success:
             return get_output(
                 "fu.check.hope_success",
                 name=name or "",
                 attribute1=attr1,
                 attribute2=attr2,
-                d1=d1,
-                d2=d2,
+                hope_dice=hope_dice,
+                fear_dice=fear_dice,
                 hope_attr=hope_attr,
                 fear_attr=fear_attr,
                 hope=hope_max,
                 fear=fear_max,
                 total=total,
                 difficulty=difficulty,
+                high_die=high_die,
+                low_die=low_die,
             )
         else:
             return get_output(
@@ -109,31 +127,36 @@ def fu_check(attr1: str, attr2: str, difficulty: int, user_id: str = None, name:
                 name=name or "",
                 attribute1=attr1,
                 attribute2=attr2,
-                d1=d1,
-                d2=d2,
+                hope_dice=hope_dice,
+                fear_dice=fear_dice,
                 hope_attr=hope_attr,
                 fear_attr=fear_attr,
                 hope=hope_max,
                 fear=fear_max,
                 total=total,
                 difficulty=difficulty,
+                high_die=high_die,
+                low_die=low_die,
             )
     else:
-        # fear is d2 (d1 < d2)
+        # fear is fear_dice (hope_dice < fear_dice)
         if success:
             return get_output(
                 "fu.check.fear_success",
                 name=name or "",
                 attribute1=attr1,
                 attribute2=attr2,
-                d1=d1,
-                d2=d2,
+                hope_dice=hope_dice,
+                fear_dice=fear_dice,
                 hope_attr=hope_attr,
                 fear_attr=fear_attr,
                 hope=hope_max,
                 fear=fear_max,
                 total=total,
                 difficulty=difficulty,
+                high_die=high_die,
+                low_die=low_die,
+
             )
         else:
             return get_output(
@@ -141,14 +164,16 @@ def fu_check(attr1: str, attr2: str, difficulty: int, user_id: str = None, name:
                 name=name or "",
                 attribute1=attr1,
                 attribute2=attr2,
-                d1=d1,
-                d2=d2,
+                hope_dice=hope_dice,
+                fear_dice=fear_dice,
                 hope_attr=hope_attr,
                 fear_attr=fear_attr,
                 hope=hope_max,
                 fear=fear_max,
                 total=total,
                 difficulty=difficulty,
+                high_die=high_die,
+                low_die=low_die,
             )
     # ----------------- 命刻系统 -----------------
     # 提供：新增命刻、显示命刻、推进/回退命刻、删除命刻
