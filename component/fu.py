@@ -140,8 +140,8 @@ def fu_check(attr1: str, attr2: str, difficulty: int, user_id: str = None, name:
                 fear=fear_max,
                 total=total,
                 difficulty=difficulty,
-                high_die=high_dice,
-                low_die=low_dice,
+                high_dice=high_dice,
+                low_dice=low_dice,
             )
         else:
             return get_output(
