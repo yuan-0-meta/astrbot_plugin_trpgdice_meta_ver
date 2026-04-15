@@ -5,7 +5,7 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig({
   plugins: [vue()],
   server: {
-    // allowedHosts: ['.atritrpg.chat'],
+    allowedHosts: ['47.121.195.78'],
     proxy: {
       '/api': {
           changeOrigin: true,
