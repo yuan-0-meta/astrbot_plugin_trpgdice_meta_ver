@@ -173,7 +173,7 @@ npm run build
 
 进入 `log-painter/frontend/vite.config.ts` 中，在 `allowedHosts` 一项中修改您的服务器域名。
 
-进入 `component/config.yaml` 中将 `setting.website` 一项修改为您自己的域名 
+进入 `component/config.yaml` 中将 `setting.website` 一项修改为您自己的域名
 
 ---
 
