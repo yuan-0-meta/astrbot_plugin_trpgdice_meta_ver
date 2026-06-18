@@ -301,7 +301,6 @@ def get_roll_result(name: str, roll_result: int, skill_value: int, group: str):
     根据掷骰结果和技能值计算判定结果文本（COC规则）。
     所有输出建议通过 get_output 配置。
     """
-    name = name
     try:
         rule = get_great_sf_rule(group)
     except Exception:
@@ -313,17 +312,17 @@ def get_roll_result(name: str, roll_result: int, skill_value: int, group: str):
         validation_prefix += get_output("coc_roll.results.reset", rule=GREAT_SF_RULE_STR[GREAT_SF_RULE_DEFAULT])
 
     if roll_result in great_success_range(skill_value, rule):
-        return validation_prefix + get_output("coc_roll.results.great_success")
+        return validation_prefix + get_output("coc_roll.results.great_success", name=name)
     elif roll_result <= skill_value / 5:
-        return validation_prefix + get_output("coc_roll.results.extreme_success")
+        return validation_prefix + get_output("coc_roll.results.extreme_success", name=name)
     elif roll_result <= skill_value / 2:
-        return validation_prefix + get_output("coc_roll.results.hard_success")
+        return validation_prefix + get_output("coc_roll.results.hard_success", name=name)
     elif roll_result <= skill_value:
-        return validation_prefix + get_output("coc_roll.results.success")
+        return validation_prefix + get_output("coc_roll.results.success", name=name)
     elif roll_result in great_failure_range(skill_value, rule):
-        return validation_prefix + get_output("coc_roll.results.great_failure")
+        return validation_prefix + get_output("coc_roll.results.great_failure", name=name)
     else:
-        return validation_prefix + get_output("coc_roll.results.failure")
+        return validation_prefix + get_output("coc_roll.results.failure", name=name)
 
 def fireball(ring: int = 3):
     """
@@ -349,13 +348,13 @@ def roll_RP(user_id: str):
     RP_str = f"{user_id}_{today}"
     hash = hashlib.sha256(RP_str.encode()).hexdigest()
     rp = int(hash, 16) % 100 + 1
-    if rp<20:
+    if rp < 20:
         return get_output("rp.today.lowest", rp=rp)
-    elif rp<40:
+    elif rp < 40:
         return get_output("rp.today.low", rp=rp)
-    elif rp<60:
+    elif rp < 60:
         return get_output("rp.today.middle", rp=rp)
-    elif rp<80:
+    elif rp < 80:
         return get_output("rp.today.high", rp=rp)
     else:
         return get_output("rp.today.highest", rp=rp)
