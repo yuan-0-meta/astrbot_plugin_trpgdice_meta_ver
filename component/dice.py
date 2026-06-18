@@ -251,7 +251,7 @@ def roll_attribute_bonus(dice_count, skill_name, skill_value, group_id, name):
 
     final_y = final_tens * 10 + ones_digit
 
-    result = get_roll_result(final_y, skill_value, str(group_id))
+    result = get_roll_result(name, final_y, skill_value, str(group_id))
 
     return get_output(
         "skill_check.bonus",
@@ -296,11 +296,12 @@ def roll_hidden(message: str = None):
     else:
         return get_output("dice.hidden.success", result=result_message)
 
-def get_roll_result(roll_result: int, skill_value: int, group: str):
+def get_roll_result(name: str, roll_result: int, skill_value: int, group: str):
     """
     根据掷骰结果和技能值计算判定结果文本（COC规则）。
     所有输出建议通过 get_output 配置。
     """
+    name = name
     try:
         rule = get_great_sf_rule(group)
     except Exception:
@@ -348,5 +349,15 @@ def roll_RP(user_id: str):
     RP_str = f"{user_id}_{today}"
     hash = hashlib.sha256(RP_str.encode()).hexdigest()
     rp = int(hash, 16) % 100 + 1
-    return get_output("rp.today", rp=rp)
+    if rp<20:
+        return get_output("rp.today.lowest", rp=rp)
+    elif rp<40:
+        return get_output("rp.today.low", rp=rp)
+    elif rp<60:
+        return get_output("rp.today.middle", rp=rp)
+    elif rp<80:
+        return get_output("rp.today.high", rp=rp)
+    else:
+        return get_output("rp.today.highest", rp=rp)
+    
 
