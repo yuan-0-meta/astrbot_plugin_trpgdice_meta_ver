@@ -186,7 +186,7 @@ def roll_attribute(skill_name, skill_value, group_id, name):
     roll_result = 100 if (tens_digit == 0 and ones_digit == 0) else (tens_digit * 10 + ones_digit)
 
     # 这里建议 get_roll_result 也迁移到 dice.py 或 rules.py
-    result = get_roll_result(roll_result, skill_value, str(group_id))
+    result = get_roll_result(name, roll_result, skill_value, str(group_id))
 
     return get_output(
         "skill_check.normal",
@@ -217,7 +217,7 @@ def roll_attribute_penalty(dice_count, skill_name, skill_value, group_id, name):
         final_tens = max(new_tens_digits)
         final_y = final_tens * 10 + ones_digit
 
-    result = get_roll_result(final_y, skill_value, str(group_id))
+    result = get_roll_result(name, final_y, skill_value, str(group_id))
 
     return get_output(
         "skill_check.penalty",
